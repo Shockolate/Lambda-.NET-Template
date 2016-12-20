@@ -1,6 +1,9 @@
 {
   "version": "1.0.0-*",
+
   "buildOptions": {
+    "outputName": "CsharpTemplateService",
+    "platform": "anycpu"
   },
 
   "dependencies": {
@@ -8,18 +11,17 @@
       "type": "platform",
       "version": "1.0.0"
     },
-
     "Amazon.Lambda.Core": "1.0.0*",
     "Amazon.Lambda.Serialization.Json": "1.0.1",
-
-    "Amazon.Lambda.Tools" : {
-      "type" :"build",
-      "version":"1.0.2-preview1"
-    }
+    "Amazon.Lambda.Tools": {
+      "type": "build",
+      "version": "1.0.2-preview1"
+    },
+    "Amazon.Lambda.APIGatewayEvents": "1.0.0"
   },
 
   "tools": {
-    "Amazon.Lambda.Tools" : "1.0.2-preview1"
+    "Amazon.Lambda.Tools":  "1.0.2-preview1" 
   },
 
   "frameworks": {

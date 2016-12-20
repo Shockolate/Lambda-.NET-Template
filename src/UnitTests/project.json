@@ -4,26 +4,18 @@
   },
 
   "dependencies": {
+    "Amazon.Lambda.Core": "1.0.0*",
+    "Amazon.Lambda.TestUtilities": "1.0.0*",
+    "dotnet-test-nunit": "3.4.0-beta-1",
+    "Implementation": "1.0.0",
     "Microsoft.NETCore.App": {
       "type": "platform",
       "version": "1.0.0"
     },
-
-    "Amazon.Lambda.Core": "1.0.0*",
-    "Amazon.Lambda.TestUtilities": "1.0.0*",
- 
-
-
-    "LambdaNet": "1.0.0",
-
-    "xunit": "2.1.0-*",
-    "dotnet-test-xunit": "2.2.0-*"
+    "NUnit": "3.5.0"
   },
 
-
-
-
-  "testRunner": "xunit",
+  "testRunner": "nunit",
 
   "frameworks": {
     "netcoreapp1.0": {
@@ -31,3 +23,4 @@
     }
   }
 }
+  

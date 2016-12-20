@@ -1,0 +1,18 @@
+swagger: "2.0"
+info:
+  version: "1.0"
+  title: "Lambda C# Template"
+basePath: "/v1"
+schemes:
+- "https"
+paths:
+  /ping:
+    get:
+      summary: Simple Canary check
+      responses:
+        200:
+          description: |
+            Successful canary check
+          schema:
+            type: string
+            default: 'pong'

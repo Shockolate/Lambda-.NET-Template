@@ -1,15 +1,14 @@
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("LambdaNet.Tests")]
+[assembly: AssemblyTitle("LambdaNet")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Microsoft")]
-[assembly: AssemblyProduct("LambdaNet.Tests")]
+[assembly: AssemblyProduct("LambdaNet")]
 [assembly: AssemblyCopyright("Copyright © Microsoft 2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +19,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("026e1631-033b-447f-a814-e8b1f7eadac6")]
+[assembly: Guid("17507575-1321-4641-9408-7ebd8b72675e")]
 
 // Version information for an assembly consists of the following four values:
 //

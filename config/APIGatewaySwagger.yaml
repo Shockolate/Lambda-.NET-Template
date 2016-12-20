@@ -1,0 +1,180 @@
+swagger: "2.0"
+info:
+  version: "1.0"
+  title: "Lambda C# Template"
+basePath: "/v1"
+schemes:
+- "https"
+paths:
+  /ping:
+    get:
+      summary: Simple Canary check
+      responses:
+        200:
+          description: |
+            Successful canary check
+          schema:
+            type: string
+            default: 'pong'
+      x-amazon-apigateway-integration:
+        requestTemplates:
+          application/json: "{\"statusCode\": 200}"
+        responses:
+          default:
+            statusCode: "200"
+            responseTemplates:
+              application/json: "\"pong\""
+        passthroughBehavior: "when_no_match"
+        type: "mock"
+
+  /swagger:
+    get:
+      responses:
+        200:
+          description: "200 response"
+          headers:
+            X-Requested-With:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+            Access-Control-Allow-Methods:
+              type: "string"
+            Access-Control-Allow-Headers:
+              type: "string"
+            Content-Type:
+              type: "string"
+      x-amazon-apigateway-integration:
+        uri: "https://s3-eu-west-1.amazonaws.com/microservice-artifacts/tools/swagger-ui/index.html"
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: "'POST,GET,OPTIONS'"
+              method.response.header.Content-Type: "integration.response.header.Content-Type"
+              method.response.header.X-Requested-With: "'*'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,x-requested-with'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        passthroughBehavior: "when_no_match"
+        httpMethod: "GET"
+        type: "http"
+    options:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/Empty"
+          headers:
+            X-Requested-With:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+            Access-Control-Allow-Methods:
+              type: "string"
+            Access-Control-Allow-Headers:
+              type: "string"
+      x-amazon-apigateway-integration:
+        requestTemplates:
+          application/json: "{\"statusCode\": 200}"
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: "'POST,GET,OPTIONS'"
+              method.response.header.X-Requested-With: "'*'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,x-requested-with'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        passthroughBehavior: "when_no_match"
+        type: "mock"
+  /swagger/file:
+    get:
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "200 response"
+          headers:
+            X-Requested-With:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+            Access-Control-Allow-Methods:
+              type: "string"
+            Access-Control-Allow-Headers:
+              type: "string"
+            Content-Type:
+              type: "string"
+      x-amazon-apigateway-integration:
+        uri: "https://s3-eu-west-1.amazonaws.com/microservice-artifacts/lambda/template/swagger.yaml"
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: "'POST,GET,OPTIONS'"
+              method.response.header.Content-Type: "integration.response.header.Content-Type"
+              method.response.header.X-Requested-With: "'*'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,x-requested-with'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        passthroughBehavior: "when_no_match"
+        httpMethod: "GET"
+        type: "http"
+    options:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/Empty"
+          headers:
+            X-Requested-With:
+              type: "string"
+            Access-Control-Allow-Origin:
+              type: "string"
+            Access-Control-Allow-Methods:
+              type: "string"
+            Access-Control-Allow-Headers:
+              type: "string"
+      x-amazon-apigateway-integration:
+        requestTemplates:
+          application/json: "{\"statusCode\": 200}"
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: "'POST,GET,OPTIONS'"
+              method.response.header.X-Requested-With: "'*'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,x-requested-with'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        passthroughBehavior: "when_no_match"
+        type: "mock"
+
+  /{proxy+}:
+    x-amazon-apigateway-any-method:
+      parameters:
+      - name: "proxy"
+        in: "path"
+        required: true
+        type: "string"
+      responses: {}
+      x-amazon-apigateway-integration:
+        credentials: "arn:aws:iam::652754698884:role/APIGatewayAWSProxyExecRole"
+        responses:
+          default:
+            statusCode: "200"
+        uri: "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:652754698884:function:TemplateServiceGreedyController:${stageVariables.environment}/invocations"
+        passthroughBehavior: "when_no_match"
+        httpMethod: "POST"
+        cacheNamespace: "Namespace"
+        cacheKeyParameters:
+        - "method.request.path.proxy"
+        type: "aws_proxy"
+
+definitions:
+  Empty:
+    type: object
