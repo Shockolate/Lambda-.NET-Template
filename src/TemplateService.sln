@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "LambdaNet", "LambdaNet\LambdaNet\LambdaNet.xproj", "{17507575-1321-4641-9408-7EBD8B72675E}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Implementation", "Implementation\Implementation.xproj", "{17507575-1321-4641-9408-7EBD8B72675E}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "LambdaNet.Tests", "LambdaNet\LambdaNet.Tests\LambdaNet.Tests.xproj", "{026E1631-033B-447F-A814-E8B1F7EADAC6}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "UnitTests", "UnitTests\UnitTests.xproj", "{026E1631-033B-447F-A814-E8B1F7EADAC6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

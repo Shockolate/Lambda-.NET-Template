@@ -1,0 +1,27 @@
+deployment_package_name: 'CsharpTemplate.zip'
+lambda_role_arn: 'arn:aws:iam::652754698884:role/LambdaMicroservice'
+s3:
+  lambda:
+    bucket: 'microservice-artifacts'
+    key: 'lambda/template/CsharpTemplate.zip'
+  secrets:
+    bucket: 'microservice-secrets'
+    key: 'template_secrets.zip'
+  swagger:
+    bucket: 'microservice-artifacts'
+    key: 'lambda/template/swagger.yaml'
+  importer:
+    bucket: 'microservice-artifacts'
+    key: 'tools/aws-apigateway-importer-1.0.3-SNAPSHOT-jar-with-dependencies.jar'
+subnet_ids:
+  - 'subnet-7a422a1e'
+  - 'subnet-cce782ba'
+  - 'subnet-e0a903b8'
+security_groups:
+  - 'sg-09252c6e'
+functions:
+  - name: 'TemplateServiceGreedyController'
+    handler: 'CsharpTemplateService::Implementation.Controller::Handler'
+    description: 'Template Service Description'
+    timeout: 30
+    memory_size: 256
