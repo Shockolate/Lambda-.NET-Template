@@ -34,7 +34,7 @@ namespace Implementation
         {
             if (IsLoggable(Verbosity.Error))
             {
-                LambdaLogger.Log("ERROR\t" + error + "\n");
+                LambdaLogger.Log("ERROR    " + error + "\n");
             }
         }
 
@@ -42,7 +42,7 @@ namespace Implementation
         {
             if (IsLoggable(Verbosity.Info))
             {
-                LambdaLogger.Log("INFO\t" + info + "\n");
+                LambdaLogger.Log("INFO    " + info + "\n");
             }
         }
 
@@ -50,7 +50,7 @@ namespace Implementation
         {
             if (IsLoggable(Verbosity.Debug))
             {
-                LambdaLogger.Log("DEBUG\t" + debug + "\n");
+                LambdaLogger.Log("DEBUG    " + debug + "\n");
             }
         }
 

@@ -17,7 +17,7 @@ namespace Implementation
         public async Task<APIGatewayProxyResponse> Handler(APIGatewayProxyRequest request, ILambdaContext context)
         {
             _logger = new Logger(request.StageVariables.ContainsKey("verbosity") ? request.StageVariables["verbosity"] : "Debug");
-            _logger.LogDebug("\n" + request.ToLoggableEvent());
+            request.LogEventDebug(_logger);
             var returnHeaders = new Dictionary<string, string> {{"Content-Type", "application/json"}};
             var response = new APIGatewayProxyResponse {StatusCode = 200, Headers = returnHeaders, Body = "\"Hello World!\""};
             var timeout = TimeSpan.FromMilliseconds(50);

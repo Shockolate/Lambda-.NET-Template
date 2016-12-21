@@ -5,100 +5,75 @@ namespace Implementation
 {
     public static class Extensions
     {
-        public static string ToLoggableEvent(this APIGatewayProxyRequest req)
+        public static void LogEventDebug(this APIGatewayProxyRequest req, ILogger logger)
         {
-            var sb = new StringBuilder();
-            sb.AppendFormat("Body: {0}", req.Body);
-            sb.AppendLine();
+            logger.LogDebug(string.Format("Body: {0}", req.Body));
             if (req.Headers != null)
             {
-                sb.AppendLine("Headers: ");
+                logger.LogDebug("Headers: ");
                 foreach (var kvp in req.Headers)
                 {
-                    sb.AppendFormat("\tKey = {0}, Value = {1}", kvp.Key, kvp.Value);
-                    sb.AppendLine();
+                    logger.LogDebug(string.Format("    Key = {0}, Value = {1}", kvp.Key, kvp.Value));
                 }
             }
-            sb.AppendFormat("HttpMethod: {0}", req.HttpMethod);
-            sb.AppendLine();
-            sb.AppendFormat("Path: {0}", req.Path);
-            sb.AppendLine();
-            sb.AppendLine("PathParameters: ");
+            logger.LogDebug(string.Format("HttpMethod: {0}", req.HttpMethod));
+            logger.LogDebug(string.Format("Path: {0}", req.Path));
+            logger.LogDebug("PathParameters: ");
             if (req.PathParameters != null)
             {
                 foreach (var kvp in req.PathParameters)
                 {
-                    sb.AppendFormat("\tKey = {0}, Value = {1}", kvp.Key, kvp.Value);
-                    sb.AppendLine();
+                    logger.LogDebug(string.Format("    Key = {0}, Value = {1}", kvp.Key, kvp.Value));
                 }
             }
 
-            sb.AppendLine("QueryStringParameters: ");
+            logger.LogDebug("QueryStringParameters: ");
             if (req.QueryStringParameters != null)
             {
                 foreach (var kvp in req.QueryStringParameters)
                 {
-                    sb.AppendFormat("\tKey = {0}, Value = {1}", kvp.Key, kvp.Value);
-                    sb.AppendLine();
+                    logger.LogDebug(string.Format("    Key = {0}, Value = {1}", kvp.Key, kvp.Value));
+                    
                 }
             }
             if (req.RequestContext != null)
             {
-                sb.AppendLine("ProxyRequestContext:");
-                sb.AppendFormat("\tAccountId: {0}", req.RequestContext.AccountId);
-                sb.AppendLine();
-                sb.AppendFormat("\tApiId: {0}", req.RequestContext.ApiId);
-                sb.AppendLine();
-                sb.AppendFormat("\tHttpMethod: {0}", req.RequestContext.HttpMethod);
+                logger.LogDebug("ProxyRequestContext:");
+                logger.LogDebug(string.Format("    AccountId: {0}", req.RequestContext.AccountId));
+                
+                logger.LogDebug(string.Format("    ApiId: {0}", req.RequestContext.ApiId));
+                
+                logger.LogDebug(string.Format("    HttpMethod: {0}", req.RequestContext.HttpMethod));
                 if (req.RequestContext.Identity != null)
                 {
-                    sb.AppendLine("\tIdentity:");
-                    sb.AppendFormat("\t\tAccountId: {0}", req.RequestContext.Identity.AccountId);
-                    sb.AppendLine();
-                    sb.AppendFormat("\t\tApiKey: {0}", req.RequestContext.Identity.ApiKey);
-                    sb.AppendLine();
-                    sb.AppendFormat("\t\tCaller: {0}", req.RequestContext.Identity.Caller);
-                    sb.AppendLine();
-                    sb.AppendFormat("\t\tCognitoAuthenticationProvider: {0}", req.RequestContext.Identity.CognitoAuthenticationProvider);
-                    sb.AppendLine();
-                    sb.AppendFormat("\t\tCognitoAuthenticationType: {0}", req.RequestContext.Identity.CognitoAuthenticationType);
-                    sb.AppendLine();
-                    sb.AppendFormat("\t\tCognitoIdentityId: {0}", req.RequestContext.Identity.CognitoIdentityId);
-                    sb.AppendLine();
-                    sb.AppendFormat("\t\tCognitoIdentityPoolId: {0}", req.RequestContext.Identity.CognitoIdentityPoolId);
-                    sb.AppendLine();
-                    sb.AppendFormat("\t\tSourceIp: {0}", req.RequestContext.Identity.SourceIp);
-                    sb.AppendLine();
-                    sb.AppendFormat("\t\tUser: {0}", req.RequestContext.Identity.User);
-                    sb.AppendLine();
-                    sb.AppendFormat("\t\tUserAgent: {0}", req.RequestContext.Identity.UserAgent);
-                    sb.AppendLine();
-                    sb.AppendFormat("\t\tUserArn: {0}", req.RequestContext.Identity.UserArn);
-                    sb.AppendLine();
+                    logger.LogDebug("    Identity:");
+                    logger.LogDebug(string.Format("        AccountId: {0}", req.RequestContext.Identity.AccountId));
+                    logger.LogDebug(string.Format("        ApiKey: {0}", req.RequestContext.Identity.ApiKey));
+                    logger.LogDebug(string.Format("        Caller: {0}", req.RequestContext.Identity.Caller));
+                    logger.LogDebug(string.Format("        CognitoAuthenticationProvider: {0}", req.RequestContext.Identity.CognitoAuthenticationProvider));
+                    logger.LogDebug(string.Format("        CognitoAuthenticationType: {0}", req.RequestContext.Identity.CognitoAuthenticationType));
+                    logger.LogDebug(string.Format("        CognitoIdentityId: {0}", req.RequestContext.Identity.CognitoIdentityId));
+                    logger.LogDebug(string.Format("        CognitoIdentityPoolId: {0}", req.RequestContext.Identity.CognitoIdentityPoolId));
+                    logger.LogDebug(string.Format("        SourceIp: {0}", req.RequestContext.Identity.SourceIp));
+                    logger.LogDebug(string.Format("        User: {0}", req.RequestContext.Identity.User));
+                    logger.LogDebug(string.Format("        UserAgent: {0}", req.RequestContext.Identity.UserAgent));
+                    logger.LogDebug(string.Format("        UserArn: {0}", req.RequestContext.Identity.UserArn));
                 }
-                sb.AppendFormat("\tRequestId: {0}", req.RequestContext.RequestId);
-                sb.AppendLine();
-                sb.AppendFormat("\tResourceId: {0}", req.RequestContext.ResourceId);
-                sb.AppendLine();
-                sb.AppendFormat("\tResourcePath: {0}", req.RequestContext.ResourcePath);
-                sb.AppendLine();
-                sb.AppendFormat("\tStage: {0}", req.RequestContext.Stage);
-                sb.AppendLine();
+                logger.LogDebug(string.Format("    RequestId: {0}", req.RequestContext.RequestId));
+                logger.LogDebug(string.Format("    ResourceId: {0}", req.RequestContext.ResourceId));
+                logger.LogDebug(string.Format("    ResourcePath: {0}", req.RequestContext.ResourcePath));
+                logger.LogDebug(string.Format("    Stage: {0}", req.RequestContext.Stage));
             }
-            sb.AppendFormat("Resource: {0}", req.Resource);
-            sb.AppendLine();
+            logger.LogDebug(string.Format("Resource: {0}", req.Resource));
 
-            sb.AppendLine("StageVariables:");
+            logger.LogDebug("StageVariables:");
             if (req.StageVariables != null)
             {
                 foreach (var kvp in req.StageVariables)
                 {
-                    sb.AppendFormat("\tKey = {0}, Value = {1}", kvp.Key, kvp.Value);
-                    sb.AppendLine();
+                    logger.LogDebug(string.Format("    Key = {0}, Value = {1}", kvp.Key, kvp.Value));
                 }
             }
-
-            return sb.ToString();
         }
     }
 }
