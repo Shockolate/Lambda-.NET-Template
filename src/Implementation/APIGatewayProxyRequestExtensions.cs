@@ -3,7 +3,7 @@ using Amazon.Lambda.APIGatewayEvents;
 
 namespace Implementation
 {
-    public static class Extensions
+    public static class APIGatewayProxyRequestExtensions
     {
         public static void LogEventDebug(this APIGatewayProxyRequest req, ILogger logger)
         {

@@ -70,7 +70,7 @@ task :deploy_environment, [:environment, :verbosity] => [:package, :deploy_to_la
 # Jenkins Targets
 # TODO: Implement dependencies.
 task :merge_job, [:environment, :verbosity] => [:clean, :parse_config, :retrieve, :lint, :dotnet_build, :unit_test, :package, :deploy_environment]
-task :pull_request_job => [:clean, :parse_config, :retrieve, :lint, :dotnet_build, :unit_test, :package, :integration_test, :e2e_test ]
+task :pull_request_job => [:clean, :parse_config, :retrieve, :lint, :dotnet_build, :unit_test, :package]
 
 # Workflow tasks
 desc 'Retrieves external dependencies. Calls "dotnet restore"'
