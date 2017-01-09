@@ -63,9 +63,9 @@ namespace Implementation {
         ///    Looks up a localized string similar to DELETE FROM Product
         ///WHERE ProductCrn = @Crn.
         /// </summary>
-        public static string DeleteProduct {
+        public static string ProductDelete {
             get {
-                return ResourceManager.GetString("DeleteProduct", resourceCulture);
+                return ResourceManager.GetString("ProductDelete", resourceCulture);
             }
         }
         
@@ -73,27 +73,27 @@ namespace Implementation {
         ///    Looks up a localized string similar to INSERT INTO Product (ProductCrn, Name, Quantity, Price)
         ///VALUES(@Crn, @Name, @Quantity, @Price).
         /// </summary>
-        public static string InsertProduct {
+        public static string ProductInsert {
             get {
-                return ResourceManager.GetString("InsertProduct", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///    Looks up a localized string similar to SELECT ProductCrn, Name, Quantity, Price FROM Product.
-        /// </summary>
-        public static string SelectAllProducts {
-            get {
-                return ResourceManager.GetString("SelectAllProducts", resourceCulture);
+                return ResourceManager.GetString("ProductInsert", resourceCulture);
             }
         }
         
         /// <summary>
         ///    Looks up a localized string similar to SELECT ProductCrn, Name, Quantity, Price FROM Product WHERE Crn = @crn.
         /// </summary>
-        public static string SelectProductByCrn {
+        public static string ProductSelectByCrn {
             get {
-                return ResourceManager.GetString("SelectProductByCrn", resourceCulture);
+                return ResourceManager.GetString("ProductSelectByCrn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///    Looks up a localized string similar to SELECT ProductCrn, Name, Quantity, Price FROM Product.
+        /// </summary>
+        public static string ProductsSelectAll {
+            get {
+                return ResourceManager.GetString("ProductsSelectAll", resourceCulture);
             }
         }
         
@@ -104,9 +104,9 @@ namespace Implementation {
         ///Price = @Price
         ///WHERE ProductCrn = @ProductCrn.
         /// </summary>
-        public static string UpdateProduct {
+        public static string ProductUpdate {
             get {
-                return ResourceManager.GetString("UpdateProduct", resourceCulture);
+                return ResourceManager.GetString("ProductUpdate", resourceCulture);
             }
         }
     }

@@ -118,19 +118,19 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="DeleteProduct" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Repository\DeleteProduct.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  <data name="ProductDelete" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Repository\ProductDelete.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
-  <data name="InsertProduct" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Repository\InsertProduct.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  <data name="ProductInsert" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Repository\ProductInsert.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
-  <data name="SelectAllProducts" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Repository\SelectAllProducts.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  <data name="ProductSelectByCrn" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Repository\ProductSelectByCrn.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
-  <data name="SelectProductByCrn" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Repository\SelectProductByCrn.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  <data name="ProductsSelectAll" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Repository\ProductsSelectAll.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
-  <data name="UpdateProduct" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Repository\UpdateProduct.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  <data name="ProductUpdate" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Repository\ProductUpdate.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
 </root>
