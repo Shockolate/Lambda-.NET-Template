@@ -32,7 +32,7 @@ namespace Implementation.Repository
             using (var connection = _connectionFactory(_connectionString))
             {
                 connection.Open();
-                connection.Execute(Resource.InsertProduct, product);
+                connection.Execute(Resource.ProductInsert, product);
             }
         }
 
@@ -41,7 +41,7 @@ namespace Implementation.Repository
             using (var connection = _connectionFactory(_connectionString))
             {
                 connection.Open();
-                return connection.Query<Product>(Resource.SelectAllProducts);
+                return connection.Query<Product>(Resource.ProductsSelectAll);
             }
         }
 
@@ -50,7 +50,7 @@ namespace Implementation.Repository
             using (var connection = _connectionFactory(_connectionString))
             {
                 connection.Open();
-                return connection.Query<Product>(Resource.SelectProductByCrn, new {Crn = crn}).FirstOrDefault();
+                return connection.Query<Product>(Resource.ProductSelectByCrn, new {Crn = crn}).FirstOrDefault();
             }
         }
 
@@ -59,7 +59,7 @@ namespace Implementation.Repository
             using (var connection = _connectionFactory(_connectionString))
             {
                 connection.Open();
-                connection.Execute(Resource.DeleteProduct, new {Crn = crn});
+                connection.Execute(Resource.ProductDelete, new {Crn = crn});
             }
         }
 
@@ -68,7 +68,7 @@ namespace Implementation.Repository
             using (var connection = _connectionFactory(_connectionString))
             {
                 connection.Open();
-                connection.Query(Resource.UpdateProduct, product);
+                connection.Query(Resource.ProductUpdate, product);
             }
         }
     }
