@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
@@ -9,24 +10,26 @@ namespace Implementation.Repository
 {
     public class ProductRepository
     {
+        private readonly Func<string, IDbConnection> _connectionFactory;
         private readonly string _connectionString;
 
-        public ProductRepository()
+        public ProductRepository() : this(CreateConnection) {}
+
+        public ProductRepository(Func<string, IDbConnection> connectionFactory)
         {
-            _connectionString = @"Server=localhost;Database=dbname;Trusted_Connection=true"; //Get connection string
+            _connectionFactory = connectionFactory;
+            _connectionString = @"Server=localhost;Database=dbname;Trusted_Connection=true"; //Get connection string here. Opportunity for DI
+
         }
 
-        internal IDbConnection Connection
+        internal static IDbConnection CreateConnection(string connectionString)
         {
-            get
-            {
-                return new SqlConnection(_connectionString);
-            }
+            return new SqlConnection(connectionString);
         }
 
         public void Add(Product product)
         {
-            using (var connection = Connection)
+            using (var connection = _connectionFactory(_connectionString))
             {
                 connection.Open();
                 connection.Execute(Resource.InsertProduct, product);
@@ -35,7 +38,7 @@ namespace Implementation.Repository
 
         public IEnumerable<Product> GetAll()
         {
-            using (var connection = Connection)
+            using (var connection = _connectionFactory(_connectionString))
             {
                 connection.Open();
                 return connection.Query<Product>(Resource.SelectAllProducts);
@@ -44,7 +47,7 @@ namespace Implementation.Repository
 
         public Product GetByCrn(string crn)
         {
-            using (var connection = Connection)
+            using (var connection = _connectionFactory(_connectionString))
             {
                 connection.Open();
                 return connection.Query<Product>(Resource.SelectProductByCrn, new {Crn = crn}).FirstOrDefault();
@@ -53,7 +56,7 @@ namespace Implementation.Repository
 
         public void Delete(string crn)
         {
-            using (var connection = Connection)
+            using (var connection = _connectionFactory(_connectionString))
             {
                 connection.Open();
                 connection.Execute(Resource.DeleteProduct, new {Crn = crn});
@@ -62,7 +65,7 @@ namespace Implementation.Repository
 
         public void Update(Product product)
         {
-            using (var connection = Connection)
+            using (var connection = _connectionFactory(_connectionString))
             {
                 connection.Open();
                 connection.Query(Resource.UpdateProduct, product);
