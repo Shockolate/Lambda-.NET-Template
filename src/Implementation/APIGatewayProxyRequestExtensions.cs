@@ -3,6 +3,7 @@ using Amazon.Lambda.APIGatewayEvents;
 
 namespace Implementation
 {
+    // ReSharper disable once InconsistentNaming
     public static class APIGatewayProxyRequestExtensions
     {
         public static void LogEventDebug(this APIGatewayProxyRequest req, ILogger logger)

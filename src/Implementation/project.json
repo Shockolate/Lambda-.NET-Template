@@ -17,7 +17,8 @@
       "type": "build",
       "version": "1.0.2-preview1"
     },
-    "Amazon.Lambda.APIGatewayEvents": "1.0.0"
+    "Amazon.Lambda.APIGatewayEvents": "1.0.0",
+    "Dapper": "1.50.2"
   },
 
   "tools": {

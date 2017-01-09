@@ -1,0 +1,1 @@
+﻿SELECT ProductCrn, Name, Quantity, Price FROM Product
