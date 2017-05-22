@@ -1,7 +1,6 @@
-﻿using System.Text;
-using Amazon.Lambda.APIGatewayEvents;
+﻿using Amazon.Lambda.APIGatewayEvents;
 
-namespace Implementation
+namespace TemplateService
 {
     // ReSharper disable once InconsistentNaming
     public static class APIGatewayProxyRequestExtensions
@@ -34,16 +33,15 @@ namespace Implementation
                 foreach (var kvp in req.QueryStringParameters)
                 {
                     logger.LogDebug(string.Format("    Key = {0}, Value = {1}", kvp.Key, kvp.Value));
-                    
                 }
             }
             if (req.RequestContext != null)
             {
                 logger.LogDebug("ProxyRequestContext:");
                 logger.LogDebug(string.Format("    AccountId: {0}", req.RequestContext.AccountId));
-                
+
                 logger.LogDebug(string.Format("    ApiId: {0}", req.RequestContext.ApiId));
-                
+
                 logger.LogDebug(string.Format("    HttpMethod: {0}", req.RequestContext.HttpMethod));
                 if (req.RequestContext.Identity != null)
                 {

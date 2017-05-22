@@ -1,4 +1,8 @@
-﻿namespace Implementation
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace TemplateService
 {
     public interface ILogger
     {
@@ -8,4 +12,3 @@
         void LogDebug(string debug);
     }
 }
-    

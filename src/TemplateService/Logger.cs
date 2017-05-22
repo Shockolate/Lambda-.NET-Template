@@ -1,14 +1,13 @@
 ﻿using System;
 using Amazon.Lambda.Core;
-// ReSharper disable SwitchStatementMissingSomeCases
 
-namespace Implementation
+namespace TemplateService
 {
     internal class Logger : ILogger
     {
         private Verbosity _verbosity;
 
-        public Logger() : this(Verbosity.Silent) {}
+        public Logger() : this(Verbosity.Silent) { }
 
         public Logger(Verbosity verbosityLevel)
         {
@@ -61,32 +60,25 @@ namespace Implementation
                 case Verbosity.Error:
                     switch (logLevel)
                     {
-                        case Verbosity.Error:
-                            return true;
-                        default:
-                            return false;
+                        case Verbosity.Error: return true;
+                        default: return false;
                     }
                 case Verbosity.Info:
-                    switch(logLevel)
+                    switch (logLevel)
                     {
                         case Verbosity.Error:
-                        case Verbosity.Info:
-                            return true;
-                        default:
-                            return false;
+                        case Verbosity.Info: return true;
+                        default: return false;
                     }
                 case Verbosity.Debug:
                     switch (logLevel)
                     {
                         case Verbosity.Error:
                         case Verbosity.Info:
-                        case Verbosity.Debug:
-                            return true;
-                        default:
-                            return false;
+                        case Verbosity.Debug: return true;
+                        default: return false;
                     }
-                default:
-                    return false;
+                default: return false;
             }
         }
     }
