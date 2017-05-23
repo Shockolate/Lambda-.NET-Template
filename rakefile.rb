@@ -9,6 +9,7 @@ require 'yaml'
 require 'zip'
 require 'forwardable'
 require 'swagger'
+require 'active_support/core_ext/hash'
 
 STDOUT.sync = true
 STDERR.sync = true
