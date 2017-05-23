@@ -1,18 +1,21 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Amazon.Lambda.APIGatewayEvents;
 using Amazon.Lambda.TestUtilities;
-using Implementation;
 using NUnit.Framework;
 
-namespace UnitTests
+namespace TemplateService.Tests
 {
     [TestFixture]
-    public class ControllerTest
+    public class ControllerTests
     {
         [Test]
         public void TestFunction()
         {
-            var testEvent = new APIGatewayProxyRequest {Body = "1234", StageVariables = new Dictionary<string, string>(1) { ["verbosity"] = Verbosity.Debug.ToString() } };
+            var testEvent = new APIGatewayProxyRequest
+            {
+                Body = "1234",
+                StageVariables = new Dictionary<string, string>(1) {["verbosity"] = Verbosity.Info.ToString()}
+            };
             var function = new Controller();
             var context = new TestLambdaContext();
             var result = function.Handler(testEvent, context).Result;

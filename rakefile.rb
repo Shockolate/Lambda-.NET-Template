@@ -9,90 +9,90 @@ require 'yaml'
 require 'zip'
 require 'forwardable'
 require 'swagger'
+require 'active_support/core_ext/hash'
 
 STDOUT.sync = true
 STDERR.sync = true
 
 ROOT = File.dirname(__FILE__)
 SRC_DIR = File.join(ROOT, 'src')
-IMPLEMENTATION_DIR = File.join(SRC_DIR, 'Implementation')
-UNIT_TESTS_DIR = File.join(SRC_DIR, 'UnitTests')
+IMPLEMENTATION_DIR = File.join(SRC_DIR, 'TemplateService')
+UNIT_TESTS_DIR = File.join(SRC_DIR, 'TemplateService.Tests')
 PACKAGE_DIR = File.join(ROOT, 'package')
 CONFIG_DIR = File.join(ROOT, 'config')
+REPORTS_DIR = File.join(ROOT, 'reports')
 
 CLEAN.include(PACKAGE_DIR)
 CLEAN.include(File.join(ROOT, 'reports'))
 CLEAN.include(File.join(SRC_DIR, '**/bin'), File.join(SRC_DIR, '**/obj'), 'output')
-CLEAN.include(File.join(ROOT, '**/TestResult.xml'))
+CLEAN.include(REPORTS_DIR)
 
 # Developer tasks
-desc 'Lints, unit tests, and builds the package directory.'
-task :build => [:parse_config, :retrieve, :dotnet_build, :unit_test]
+desc 'Compiles the source code to binaries.'
+task :build => [:clean, :parse_config, :retrieve, :dotnet_build, :unit_test]
 
-desc 'Deploys a deployment package to Lambda in the specified environment/stage.'
-task :deploy_to_lambda, [:environment] => [:parse_config] do |t, args|
-  #validate params
-  env = args[:environment]
-  raise 'Parameter environment needs to be set' if env.nil?
+# Commit Targets
+task :merge_job  => [:clean, :parse_config, :retrieve, :lint, :dotnet_build, :unit_test, :package, :deploy_production]
+task :pull_request_job => [:clean, :parse_config, :retrieve, :lint, :dotnet_build, :unit_test, :package, :deploy_test]
 
-  # publish to S3
-  puts 'Uploading deployment package to S3...'
-  t1 = Time.now
-  s3_version_id = publish_lambda_package_to_s3()
-  t2 = Time.now
-  puts "Uploaded deployment package to S3. #{t2 - t1}"
-
-  #deploy functions
-  puts 'Deploying Lambda Functions...'
-  t1 = Time.now
-  CONFIGURATION["functions"].each do |f|
-    func_version = deploy_lambda(s3_version_id, f["name"], f["handler"], f["description"], f["timeout"], f["memory_size"])
-    promote_lambda(f["name"], func_version, env)
-  end
-  t2 = Time.now
-  puts "Deployed Lambda Functions. #{t2 - t1}"
+task :deploy_production => [:parse_config, :build, :package] do
+  deploy(:production)
+  # TODO
+  # upload_swagger_file
 end
 
-desc 'Deploys OpenAPI (Swagger) Specification to the specified environment/stage with specified
-  verbosity. Defaults to DEBUG verbosity if none specified. Uploads swagger file for swagger
-  resource if environment == production.'
-task :deploy_to_apigateway, [:environment, :verbosity] => [:parse_config] do |t, args|
-  env = args[:environment]
-  raise 'Parameter environment needs to be set' if env.nil?
-  verbos = args[:verbosity]
-  verbos = 'DEBUG' if verbos.nil?
-  stage_variables = { 'verbosity' => verbos }
-  setup_apigateway(env, CONFIGURATION["api_name"], stage_variables)
+task :deploy_test => [:parse_config, :build, :package] do
+  deploy(:test)
 end
 
-task :deploy_environment, [:environment, :verbosity] => [:package, :deploy_to_lambda, :deploy_to_apigateway]
+task :deploy_environment, [:environment, :verbosity] => [:build] do |t, args|
+  raise 'Parameter environment needs to be set' if args[:environment].nil?
+  raise 'Parameter verbosity needs to be set' if args[:verbosity].nil?
+  API.deploy(LambdaWrap::Environment.new(args[:environment], { 'verbosity' => args[:verbosity] }))
+end
 
-# Jenkins Targets
-# TODO: Implement dependencies.
-task :merge_job, [:environment, :verbosity] => [:clean, :parse_config, :retrieve, :lint, :dotnet_build, :unit_test, :package, :deploy_environment]
-task :pull_request_job => [:clean, :parse_config, :retrieve, :lint, :dotnet_build, :unit_test, :package]
+desc 'Don\'t.'
+task :teardown_production => [:parse_config] do
+  teardown(:production)
+end
+
+desc 'If you want.'
+task :teardown_test => [:parse_config] do
+  teardown(:test)
+end
+
+desc 'tears down an environment - Removes Lambda Aliases and Deletes API Gateway Stage.'
+task :teardown_environment, [:environment] => [:parse_config] do |t, args|
+  # validate input parameters
+  env = args[:environment]
+  raise 'Parameter environment needs to be set' if env.nil?
+  API.teardown(LambdaWrap::Environment.new(name: args[:environment]))
+end
 
 # Workflow tasks
 desc 'Retrieves external dependencies. Calls "dotnet restore"'
 task :retrieve do
-  cmd = "dotnet restore"
-  raise 'Node Modules not installed.' if !system(cmd)
+  Dir["#{SRC_DIR}/**/*.csproj"].each do |csproj_path|
+    raise "Dependency installation failed for #{csproj_path}" unless system("dotnet restore #{csproj_path} --verbosity normal")
+  end
 end
 
 desc 'Runs Unit tests located in the src/UnitTests project.'
 task :unit_test do
-  cmd = "dotnet test #{UNIT_TESTS_DIR} --no-build"
-  raise 'Error running unit tests.' if !system(cmd)
+  Dir["#{SRC_DIR}/**/*.Tests/*.csproj"].each do |csproj_path|
+    raise "Error running unit tests: #{csproj_path}" unless system("dotnet test #{csproj_path} --no-build --logger:trx;LogFileName=#{File.join(REPORTS_DIR, 'testresults.trx')}")
+  end
 end
 
 task :dotnet_build do
-  cmd = "dotnet build #{IMPLEMENTATION_DIR} #{UNIT_TESTS_DIR}"
-  raise 'Error running building.' if !system(cmd)
+  Dir["#{SRC_DIR}/**/*.csproj"].each do |csproj_path|
+    raise "Error building: #{csproj_path}" unless system("dotnet build #{csproj_path} --framework netcoreapp1.1")
+  end
 end
 
 task :lint do
   begin
-    api = Swagger.load(File.join(CONFIG_DIR, 'ClientSwagger.yaml'))
+    Swagger.load(File.join(CONFIG_DIR, 'ClientSwagger.yaml'))
     puts 'Valid swagger file.'
   rescue Exception => e
     puts e.message
@@ -105,149 +105,134 @@ task :package => [:parse_config, :retrieve, :dotnet_build] do
   package()
 end
 
-desc 'Promotes an existing Lambda Function with Version to a given environment/stage.'
-task :promote, [:environment, :function_name, :function_version] do
-  # validate input parameters
-  env = args[:environment]
-  raise 'Parameter environment needs to be set' if env.nil?
-  function_name = args[:function_name]
-  raise 'Parameter function needs to be set' if function_name.nil?
-  function_version = args[:function_version]
-  raise 'Parameter version needs to be set' if function_version.nil?
-
-  # promote a specific lambda function version
-  promote_lambda(function_name, function_version, env)
-end
-
-desc 'tears down an environment - Removes Lambda Aliases and Deletes API Gateway Stage.'
-task :teardown_environment, [:environment] => [:parse_config] do |t, args|
-  # validate input parameters
-  env = args[:environment]
-  raise 'Parameter environment needs to be set' if env.nil?
-
-  teardown_apigateway_stage(env)
-
-  teardown_lambda_aliases(env)
-end
-
-desc 'Tears down API Gateway Stage.'
-task :teardown_apigateway_stage, [:environment] => [:parse_config] do |t, args|
-  env = args[:environment]
-  raise 'Parameter environment needs to be set' if env.nil?
-  teardown_apigateway_stage(env)
-end
-
-desc 'Tears down Lambda Environment.'
-task :teardown_lambda_aliases, [:environment] => [:parse_config] do |t, args|
-  env = args[:environment]
-  raise 'Parameter environment needs to be set' if env.nil?
-  teardown_lambda_aliases(env)
-end
-
 task :parse_config do
   puts 'Parsing config...'
-  CONFIGURATION = YAML::load_file(File.join(CONFIG_DIR, 'config.yaml'))
-  swaggerFile = YAML::load_file(File.join(CONFIG_DIR, 'ClientSwagger.yaml'))
-  CONFIGURATION['api_name'] = swaggerFile['info']['title']
+  CONFIGURATION = YAML::load_file(File.join(CONFIG_DIR, 'config.yaml')).deep_symbolize_keys
+  API = LambdaWrap::API.new()
+
+  ENVIRONMENTS = {}
+
+  CONFIGURATION[:environments].each do |e|
+    ENVIRONMENTS[e[:name].to_sym] = LambdaWrap::Environment.new(e[:name], e[:variables], e[:description])
+  end
+
+  API.add_lambda(
+    CONFIGURATION[:lambdas].map do |lambda_config|
+      lambda_config[:path_to_zip_file] = File.join(PACKAGE_DIR, 'deployment_package.zip')
+      LambdaWrap::Lambda.new(lambda_config)
+    end
+  )
+
+  API.add_api_gateway(
+    LambdaWrap::ApiGateway.new(path_to_swagger_file: File.join(CONFIG_DIR, 'APIGatewaySwagger.yaml'))
+  )
   puts 'parsed. '
 end
 
-def publish_lambda_package_to_s3()
-  lm = LambdaWrap::LambdaManager.new()
-  return lm.publish_lambda_to_s3(File.join(PACKAGE_DIR, CONFIGURATION["deployment_package_name"]), CONFIGURATION["s3"]["lambda"]["bucket"], CONFIGURATION["s3"]["lambda"]["key"])
-end
-
-def deploy_lambda(s3_version_id, function_name, handler_name, lambda_description, timeout, memory_size)
-  lambdaMgr = LambdaWrap::LambdaManager.new()
-  func_version = lambdaMgr.deploy_lambda(CONFIGURATION["s3"]["lambda"]["bucket"], CONFIGURATION["s3"]["lambda"]["key"],
-    s3_version_id, function_name, handler_name, CONFIGURATION["lambda_role_arn"], lambda_description,
-    CONFIGURATION["subnet_ids"], CONFIGURATION["security_groups"], "dotnetcore1.0", timeout, memory_size)
-   puts "Deployed #{function_name} to function version #{func_version}."
-  return func_version
-
-end
-
-def promote_lambda(function_name, func_version, env)
-  lambdaMgr = LambdaWrap::LambdaManager.new()
-  lambdaMgr.create_alias(function_name, func_version, env)
-end
-
-def setup_apigateway(env, api_name, stage_variables)
-  # delegate to api gateway manager
-  puts "Setting up #{api_name} on API Gateway and deploying to Environment: #{env}...."
-  t1 = Time.now
-  swagger_file = File.join(CONFIG_DIR, 'APIGatewaySwagger.yaml')
-  mgr = LambdaWrap::ApiGatewayManager.new()
-  uri = mgr.setup_apigateway_by_swagger_file(api_name, File.join(CONFIG_DIR, 'APIGatewaySwagger.yaml'), env, stage_variables)
-  t2 = Time.now
-  puts "API gateway with api name set to #{api_name} and environment #{env} is available at #{uri}"
-  puts "Took #{t2 - t1} seconds."
-
-  # Upload API spec for Swagger UI
-  if env == 'production'
-    upload_swagger_file()
-  end
-  return uri
-end
 
 def upload_swagger_file()
-#  cleaned_swagger = clean_swagger(YAML::load_file(File.join(CONFIG_DIR, 'swagger.yaml')))
+  cleaned_swagger = clean_swagger(YAML::load_file(File.join(CONFIG_DIR, 'ClientSwagger.yaml')))
   puts "uploading Swagger File..."
-  swaggerFile = File.open(File.join(CONFIG_DIR, 'ClientSwagger.yaml'))
-  swaggerString = swaggerFile.read
   s3 = Aws::S3::Client.new()
-  s3.put_object(acl: 'public-read', body: swaggerString, bucket: CONFIGURATION["s3"]["swagger"]["bucket"],
-    key: CONFIGURATION["s3"]["swagger"]["key"])
-  swaggerFile.close
+  s3.put_object(acl: 'public-read', body: cleaned_swagger, bucket: CONFIGURATION[:s3][:swagger][:bucket],
+    key: CONFIGURATION[:s3][:swagger][:key])
   puts "Swagger File uploaded."
 end
 
 def package()
-  puts 'Publishing & zipping binaries...'
+  puts 'Creating the deployment package...'
   t1 = Time.now
-  Dir.chdir(IMPLEMENTATION_DIR)
-  cmd = "dotnet lambda package -pl #{IMPLEMENTATION_DIR} -c Release -f netcoreapp1.0 -o #{File.join(PACKAGE_DIR, CONFIGURATION["deployment_package_name"])}"
+
+  FileUtils.mkdir(PACKAGE_DIR, verbose: true)
+  cmd = "dotnet publish #{IMPLEMENTATION_DIR} --configuration Release --framework netcoreapp1.1 --output #{PACKAGE_DIR} --verbosity normal"
   raise 'Error creating deployment package.' if !system(cmd)
-  Dir.chdir(ROOT)
+
+  zip_package
+
+  if CONFIGURATION[:s3] && CONFIGURATION[:s3][:secrets] && CONFIGURATION[:s3][:secrets][:bucket] && CONFIGURATION[:s3][:secrets][:key]
+    download_secrets
+    secrets = extract_secrets
+    add_secrets_to_package(secrets)
+    cleanup_secrets(secrets)
+  end
+
   t2 = Time.now
-  puts 'Zipped binaries. ' + (t2-t1).to_s
-=begin puts 'Downloading secrets zip....'
-  t1 = Time.now
+  puts
+  puts "Successfully created the deployment package! #{t2 - t1}"
+end
+
+def zip_package
+  Zip::File.open(File.join(PACKAGE_DIR, 'deployment_package.zip'), Zip::File::CREATE) do |io|
+    write_entries(filter_entries(PACKAGE_DIR), '', io, PACKAGE_DIR)
+  end
+end
+
+def filter_entries(directory)
+  Dir.entries(directory) - %w[. ..]
+end
+
+def write_entries(entries, path, io, input_directory)
+  entries.each do |e|
+    zip_file_path = path == '' ? e : File.join(path, e)
+    disk_file_path = File.join(input_directory, zip_file_path)
+    puts "Deflating #{disk_file_path}"
+
+    if File.directory? disk_file_path
+      recursively_deflate_directory(disk_file_path, io, zip_file_path, input_directory)
+    else
+      put_into_archive(disk_file_path, io, zip_file_path)
+    end
+  end
+end
+
+def recursively_deflate_directory(disk_file_path, io, zip_file_path, input_directory)
+  io.mkdir zip_file_path
+  write_entries(filter_entries(disk_file_path), zip_file_path, io, input_directory)
+end
+
+def put_into_archive(disk_file_path, io, zip_file_path)
+  io.add(zip_file_path, disk_file_path)
+end
+
+def download_secrets
+  puts 'Downloading secrets zip...'
   s3 = Aws::S3::Client.new()
   s3.get_object(
-    response_target: PACKAGE_DIR + '/' + CONFIGURATION["s3"]["secrets"]["key"],
-    bucket: CONFIGURATION["s3"]["secrets"]["bucket"],
-    key: CONFIGURATION["s3"]["secrets"]["key"],
+    response_target: PACKAGE_DIR + '/' + CONFIGURATION[:s3][:secrets][:key],
+    bucket: CONFIGURATION[:s3][:secrets][:bucket],
+    key: CONFIGURATION[:s3][:secrets][:key]
   )
-  t2 = Time.now
-  puts 'Secrets downloaded. ' + (t2-t1).to_s
+  puts 'Secrets downloaded. '
+end
 
+def extract_secrets
   secrets_entries = Array.new
   puts 'Extracting Secrets...'
-
-  t1 = Time.now
-  Zip::File.open(PACKAGE_DIR + '/' + CONFIGURATION["s3"]["secrets"]["key"]) do |secrets_zip_file|
+  Zip::File.open(PACKAGE_DIR + '/' + CONFIGURATION[:s3][:secrets][:key]) do |secrets_zip_file|
     secrets_zip_file.each do |entry|
       secrets_entries.push(entry.name)
-      entry.extract(PACKAGE_DIR + '/' + entry.name)
+      entry.extract(File.join(PACKAGE_DIR, entry.name))
     end
   end
-  t2 = Time.now
-  puts 'Secrets Extracted. ' + (t2 - t1).to_s
+  puts 'Secrets Extracted. '
+  secrets_entries
+end
 
+def add_secrets_to_package(secrets)
   puts 'Adding secrets to package...'
-  t1 = Time.now
-  Zip::File.open(File.join(PACKAGE_DIR, CONFIGURATION["deployment_package_name"]), Zip::File::CREATE) do |zipfile|
-    secrets_entries.each do |entry|
-      zipfile.add(entry, PACKAGE_DIR + '/' + entry)
+  Zip::File.open(File.join(PACKAGE_DIR, 'deployment_package.zip'), Zip::File::CREATE) do |zipfile|
+    secrets.each do |entry|
+      zipfile.add(entry, File.join(PACKAGE_DIR, entry))
     end
   end
-  t2 = Time.now
-  puts 'Added secrets to package. ' + (t2 - t1).to_s
-  #TODO Cleanup secrets?
-  puts "\n"
-=end
-  puts 'Successfully created the deployment package!'
+  puts 'Added secrets to package. '
+end
+
+def cleanup_secrets(secrets)
+  puts 'Cleaning up secrets...'
+  secrets << CONFIGURATION[:s3][:secrets][:key]
+  FileUtils.rm(secrets.map { |secret| File.join(PACKAGE_DIR, secret) }, verbose: true)
+  puts 'Cleaned up secrets.'
 end
 
 def clean_swagger(swagger_yaml)
@@ -262,21 +247,12 @@ def clean_swagger(swagger_yaml)
   return YAML::dump(swagger_yaml).sub(/^(---\n)/, "")
 end
 
-def teardown_apigateway_stage(stage)
-  puts "Deleting Stage: #{stage} from API: #{CONFIGURATION['api_name']}...."
-  t1 = Time.now
-  LambdaWrap::ApiGatewayManager.new.shutdown_apigateway(CONFIGURATION["api_name"], stage)
-  t2 = Time.now
-  puts "Deleted. #{t2 - t1}"
+def deploy(environment_symbol)
+  raise ArgumentError 'Must pass an environment symbol!' unless environment_symbol.is_a?(Symbol)
+  API.deploy(ENVIRONMENTS[environment_symbol])
 end
 
-def teardown_lambda_aliases(aliasValue)
-  puts "Deleting Alias: #{aliasValue} from the lambdas."
-  t1 = Time.now
-  lm = LambdaWrap::LambdaManager.new()
-  CONFIGURATION["functions"].each do |f|
-    lm.remove_alias(f["name"], aliasValue)
-  end
-  t2 = Time.now
-  puts "Deleted. #{t2 - t1}"
+def teardown(environment_symbol)
+  raise ArgumentError 'Must pass an environment symbol!' unless environment_symbol.is_a?(Symbol)
+  API.deploy(ENVIRONMENTS[environment_symbol])
 end

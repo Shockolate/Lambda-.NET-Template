@@ -4,22 +4,21 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using Dapper;
-using Implementation.Model;
+using TemplateService.Model;
 
-namespace Implementation.Repository
+namespace TemplateService.Repository
 {
     public class ProductRepository
     {
         private readonly Func<string, IDbConnection> _connectionFactory;
         private readonly string _connectionString;
 
-        public ProductRepository() : this(CreateConnection) {}
+        public ProductRepository() : this(CreateConnection) { }
 
         public ProductRepository(Func<string, IDbConnection> connectionFactory)
         {
             _connectionFactory = connectionFactory;
             _connectionString = @"Server=localhost;Database=dbname;Trusted_Connection=true"; //Get connection string here. Opportunity for DI
-
         }
 
         internal static IDbConnection CreateConnection(string connectionString)
@@ -32,7 +31,7 @@ namespace Implementation.Repository
             using (var connection = _connectionFactory(_connectionString))
             {
                 connection.Open();
-                connection.Execute(Resource.ProductInsert, product);
+                connection.Execute(Resources.ProductInsert, product);
             }
         }
 
@@ -41,7 +40,7 @@ namespace Implementation.Repository
             using (var connection = _connectionFactory(_connectionString))
             {
                 connection.Open();
-                return connection.Query<Product>(Resource.ProductsSelectAll);
+                return connection.Query<Product>(Resources.ProductsSelectAll);
             }
         }
 
@@ -50,7 +49,7 @@ namespace Implementation.Repository
             using (var connection = _connectionFactory(_connectionString))
             {
                 connection.Open();
-                return connection.Query<Product>(Resource.ProductSelectByCrn, new {Crn = crn}).FirstOrDefault();
+                return connection.Query<Product>(Resources.ProductSelectByCrn, new { Crn = crn }).FirstOrDefault();
             }
         }
 
@@ -59,7 +58,7 @@ namespace Implementation.Repository
             using (var connection = _connectionFactory(_connectionString))
             {
                 connection.Open();
-                connection.Execute(Resource.ProductDelete, new {Crn = crn});
+                connection.Execute(Resources.ProductDelete, new { Crn = crn });
             }
         }
 
@@ -68,7 +67,7 @@ namespace Implementation.Repository
             using (var connection = _connectionFactory(_connectionString))
             {
                 connection.Open();
-                connection.Query(Resource.ProductUpdate, product);
+                connection.Query(Resources.ProductUpdate, product);
             }
         }
     }

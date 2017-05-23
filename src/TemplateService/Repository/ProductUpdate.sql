@@ -1,4 +1,4 @@
-﻿UPDATE Product
+﻿﻿UPDATE Product
 SET Name = @Name,
 Quantity = @Quantity,
 Price = @Price
