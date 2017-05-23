@@ -17,7 +17,7 @@ environments:
 
 lambdas:
   - lambda_name: 'DotnetCoreTemplateLambda'
-    handler: 'Implementation::Implementation.Controller::Handler'
+    handler: 'TemplateService::TemplateService.Controller::Handler'
     description: 'Dotnet Lambda Template'
     timeout: 15
     memory_size: 256
