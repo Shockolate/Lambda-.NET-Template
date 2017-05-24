@@ -1,5 +1,3 @@
-deployment_package_name: 'CsharpTemplate.zip'
-lambda_role_arn: 'arn:aws:iam::652754698884:role/LambdaMicroservice'
 s3:
   swagger:
     bucket: 'microservice-artifacts'
