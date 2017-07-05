@@ -16,8 +16,6 @@ STDERR.sync = true
 
 ROOT = File.dirname(__FILE__)
 SRC_DIR = File.join(ROOT, 'src')
-IMPLEMENTATION_DIR = File.join(SRC_DIR, 'TemplateService')
-UNIT_TESTS_DIR = File.join(SRC_DIR, 'TemplateService.Tests')
 PACKAGE_DIR = File.join(ROOT, 'package')
 CONFIG_DIR = File.join(ROOT, 'config')
 REPORTS_DIR = File.join(ROOT, 'reports')
@@ -29,7 +27,9 @@ CLEAN.include(REPORTS_DIR)
 
 # Developer tasks
 desc 'Compiles the source code to binaries.'
-task :build => [:clean, :parse_config, :retrieve, :dotnet_build, :unit_test]
+task :build => [:clean, :parse_config, :retrieve, :dotnet_build]
+desc 'Builds and runs unit tests.'
+task :test => [:build, :unit_test]
 
 # Commit Targets
 task :merge_job  => [:clean, :parse_config, :retrieve, :lint, :dotnet_build, :unit_test, :package, :deploy_production]
@@ -79,7 +79,7 @@ end
 
 desc 'Runs Unit tests located in the src/UnitTests project.'
 task :unit_test do
-  Dir["#{SRC_DIR}/**/*.Tests/*.csproj"].each do |csproj_path|
+  Dir["#{SRC_DIR}/**/*.UnitTests/*.csproj"].each do |csproj_path|
     raise "Error running unit tests: #{csproj_path}" unless system("dotnet test #{csproj_path} --no-build --logger:trx;LogFileName=#{File.join(REPORTS_DIR, 'testresults.trx')}")
   end
 end
@@ -144,8 +144,9 @@ def package()
   t1 = Time.now
 
   FileUtils.mkdir(PACKAGE_DIR, verbose: true)
-  cmd = "dotnet publish #{IMPLEMENTATION_DIR} --configuration Release --framework netcoreapp1.1 --output #{PACKAGE_DIR} --verbosity normal"
+  cmd = "dotnet publish #{File.join(SRC_DIR, CONFIGURATION[:composition_root_project])} --configuration Release --framework netcoreapp1.1 --output #{PACKAGE_DIR} --verbosity normal"
   raise 'Error creating deployment package.' if !system(cmd)
+
 
   zip_package
 

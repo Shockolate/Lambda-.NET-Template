@@ -1,1 +1,0 @@
-﻿SELECT ProductCrn, Name, Quantity, Price FROM Product WHERE Crn = @crn
