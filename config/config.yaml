@@ -3,6 +3,8 @@ s3:
     bucket: 'microservice-artifacts'
     key: 'lambda/template/swagger.yaml'
 
+composition_root_project: 'TemplateService.APIGatewayAdapter'
+
 environments:
   - name: 'production'
     variables:
