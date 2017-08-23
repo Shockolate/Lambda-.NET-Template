@@ -6,6 +6,6 @@ namespace RestfulMicroserverless.Contracts
 {
     public interface IHttpPathHandlerFactory
     {
-        IHttpPathHandler CreateHttpPathHandler(string path, IDictionary<HttpVerb, Func<RestRequest, Task<RestResponse>>> verbHandlers);
+        IHttpPathHandler CreateHttpPathHandler(string path, IDictionary<HttpVerb, Func<RestRequest, ILogger, Task<RestResponse>>> verbHandlers);
     }
 }

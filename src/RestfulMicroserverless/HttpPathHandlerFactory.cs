@@ -7,7 +7,7 @@ namespace RestfulMicroseverless
 {
     public class HttpPathHandlerFactory : IHttpPathHandlerFactory
     {
-        public IHttpPathHandler CreateHttpPathHandler(string path, IDictionary<HttpVerb, Func<RestRequest, Task<RestResponse>>> verbHandlers)
+        public IHttpPathHandler CreateHttpPathHandler(string path, IDictionary<HttpVerb, Func<RestRequest, ILogger, Task<RestResponse>>> verbHandlers)
         {
             return new HttpPathHandler(new Route(path), verbHandlers);
         }
