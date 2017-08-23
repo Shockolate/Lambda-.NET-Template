@@ -19,6 +19,7 @@ namespace RestfulMicroseverless
 
         public async Task<RestResponse> DispatchAsync(RestRequest request, ILogger logger)
         {
+            logger.LogDebug("Dispatching!");
             try
             {
                 return await Handlers.Single(handler => handler.CanHandle(request)).HandleAsync(request, logger);

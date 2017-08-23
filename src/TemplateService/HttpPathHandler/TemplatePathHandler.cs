@@ -15,10 +15,10 @@ namespace TemplateService.HttpPathHandler
             VerbHandlers.Add(HttpVerb.Get, GetAsync);
         }
 
-        internal IDictionary<HttpVerb, Func<RestRequest, Task<RestResponse>>> VerbHandlers { get; } =
-            new Dictionary<HttpVerb, Func<RestRequest, Task<RestResponse>>>();
+        internal IDictionary<HttpVerb, Func<RestRequest, ILogger, Task<RestResponse>>> VerbHandlers { get; } =
+            new Dictionary<HttpVerb, Func<RestRequest, ILogger, Task<RestResponse>>>();
 
-        public async Task<RestResponse> GetAsync(RestRequest request)
+        public async Task<RestResponse> GetAsync(RestRequest request, ILogger logger)
         {
             return await Task.FromResult(_restResponseFactory.CreateCorsRestResponse(200));
         }

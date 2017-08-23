@@ -8,9 +8,9 @@ namespace RestfulMicroseverless
     internal class HttpPathHandler : IHttpPathHandler
     {
         private readonly Route _route;
-        private readonly IDictionary<HttpVerb, Func<RestRequest, Task<RestResponse>>> _verbHandlers;
+        private readonly IDictionary<HttpVerb, Func<RestRequest, ILogger, Task<RestResponse>>> _verbHandlers;
 
-        internal HttpPathHandler(Route route, IDictionary<HttpVerb, Func<RestRequest, Task<RestResponse>>> verbHandlers)
+        internal HttpPathHandler(Route route, IDictionary<HttpVerb, Func<RestRequest, ILogger, Task<RestResponse>>> verbHandlers)
         {
             _route = route;
             _verbHandlers = verbHandlers;
@@ -23,7 +23,7 @@ namespace RestfulMicroseverless
             Logger = logger;
             Logger.LogInfo($"Handling {request.Method} for {_route}");
             request.PathParameters = _route.BuildPathParameters(request.InvokedPath);
-            return await _verbHandlers[request.Method].Invoke(request);
+            return await _verbHandlers[request.Method].Invoke(request, logger);
         }
 
         public bool CanHandle(RestRequest request)

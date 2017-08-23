@@ -37,6 +37,7 @@ namespace TemplateService.APIGatewayAdapter
             if (apiGatewayProxyRequest.StageVariables.ContainsKey("verbosity"))
                 Enum.TryParse(apiGatewayProxyRequest.StageVariables["verbosity"], out targetVerbosity);
             _lambdaLogger.Verbosity = targetVerbosity;
+            _lambdaLogger.LogDebug("Invoked!");
 
             apiGatewayProxyRequest.LogEventDebug(_lambdaLogger);
             try

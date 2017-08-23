@@ -17,7 +17,7 @@ namespace RestfulMicroserverless.UnitTests
         private readonly RestResponseFactory _restResponseFactory = new RestResponseFactory(JsonSerializerFactory.CreateJsonPayloadSerializer());
         private readonly ILogger _logger = new UnitTestLogger();
 
-        private Task<RestResponse> _postFulfilledItemAsync(RestRequest request)
+        private Task<RestResponse> _postFulfilledItemAsync(RestRequest request, ILogger logger)
         {
             var response = _restResponseFactory.CreateCorsRestResponse();
             response.StatusCode = 201;
@@ -25,7 +25,7 @@ namespace RestfulMicroserverless.UnitTests
             return Task.FromResult(response);
         }
 
-        private static Task<RestResponse> _exceptionThrowingVerbHandler(RestRequest request)
+        private static Task<RestResponse> _exceptionThrowingVerbHandler(RestRequest request, ILogger logger)
         {
             throw new Exception("Database is down.");
         }
@@ -36,7 +36,7 @@ namespace RestfulMicroserverless.UnitTests
             _successfulPathHandlers = new List<IHttpPathHandler>
             {
                 _pathHandlerFactory.CreateHttpPathHandler("v1/fulfilleditems",
-                    new Dictionary<HttpVerb, Func<RestRequest, Task<RestResponse>>> {{HttpVerb.Post, _postFulfilledItemAsync}})
+                    new Dictionary<HttpVerb, Func<RestRequest, ILogger, Task<RestResponse>>> {{HttpVerb.Post, _postFulfilledItemAsync}})
             };
 
             _noMatchingHandlerPathHandlers = _successfulPathHandlers;
@@ -44,7 +44,7 @@ namespace RestfulMicroserverless.UnitTests
             _throwingPathHandlers = new List<IHttpPathHandler>
             {
                 _pathHandlerFactory.CreateHttpPathHandler("throw/exception",
-                    new Dictionary<HttpVerb, Func<RestRequest, Task<RestResponse>>> {{HttpVerb.Get, _exceptionThrowingVerbHandler}})
+                    new Dictionary<HttpVerb, Func<RestRequest, ILogger, Task<RestResponse>>> {{HttpVerb.Get, _exceptionThrowingVerbHandler}})
             };
         }
 
