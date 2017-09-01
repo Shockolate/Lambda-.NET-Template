@@ -1,10 +1,2 @@
-offset
-business
-cards
-must be ripped
-in half
-before packing.
-multi
-line release
-notes
-file.
+Must split ship
+<em>each</em> individual business card!

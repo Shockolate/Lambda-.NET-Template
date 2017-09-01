@@ -10,6 +10,7 @@ require 'zip'
 require 'forwardable'
 require 'swagger'
 require 'active_support/core_ext/hash'
+require 'mail'
 
 STDOUT.sync = true
 STDERR.sync = true
@@ -32,7 +33,7 @@ desc 'Builds and runs unit tests.'
 task :test => [:build, :unit_test]
 
 # Commit Targets
-task :merge_job  => [:clean, :parse_config, :retrieve, :lint, :dotnet_build, :unit_test, :package, :deploy_production]
+task :merge_job  => [:clean, :parse_config, :retrieve, :lint, :dotnet_build, :unit_test, :package, :deploy_production, :release_notification]
 task :pull_request_job => [:clean, :parse_config, :retrieve, :lint, :dotnet_build, :unit_test, :package, :deploy_test]
 
 task :deploy_production => [:parse_config, :build, :package] do
@@ -126,7 +127,16 @@ task :parse_config do
   API.add_api_gateway(
     LambdaWrap::ApiGateway.new(path_to_swagger_file: File.join(CONFIG_DIR, 'APIGatewaySwagger.yaml'))
   )
+
+  Mail.defaults do
+    delivery_method :smtp, address: 'relay.vistaprint.net', port: 25
+  end
+
   puts 'parsed. '
+end
+
+task :release_notification => [:parse_config] do
+  release_notification(CONFIGURATION[:application_name], ENV.fetch('BUILD_NUMBER', 'BuildNumberNotSet'))
 end
 
 
@@ -256,4 +266,40 @@ end
 def teardown(environment_symbol)
   raise ArgumentError 'Must pass an environment symbol!' unless environment_symbol.is_a?(Symbol)
   API.deploy(ENVIRONMENTS[environment_symbol])
+end
+
+def release_notification(application_name, build_number)
+  unless File.file?(File.join(ROOT, 'ReleaseNotes.txt'))
+    puts 'No Release Notes. Skipping email.'
+    return
+  end
+
+  release_notes = File.read(File.join(ROOT, 'ReleaseNotes.txt'))
+
+  puts 'Release Notes:'
+  puts
+  puts release_notes
+  puts
+
+  release_notes.gsub!(/\r\n|\n/, '<br />')
+
+  notification_body = File.read(File.join(CONFIG_DIR, 'NotificationEmailTemplate.html'))
+  notification_body.sub!('$APPLICATION_NAME', application_name)
+  notification_body.sub!('$BUILD_NUMBER', build_number)
+  notification_body.sub!('$RELEASE_NOTES', release_notes)
+
+  puts 'Sending Email Notification...'
+  t1 = Time.now
+  notification = Mail.new do
+    from    'MSWProductionShopfloor@vistaprint.com'
+    to      'MSWProductionShopfloor@vistaprint.com'
+    subject "New Release to #{application_name} - A Shopfloor Service"
+    body    notification_body
+  end
+
+  notification['Content-Type'] = 'text/html'
+
+  notification.deliver!
+  t2 = Time.now
+  puts "Sent Email Notification! #{t2 - t1}"
 end

@@ -5,6 +5,8 @@ s3:
 
 composition_root_project: 'TemplateService.APIGatewayAdapter'
 
+application_name: 'C# Template Project'
+
 environments:
   - name: 'production'
     variables:

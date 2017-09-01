@@ -6,4 +6,5 @@ source 'https://rubygems.org' do
   gem 'rake', '>= 11'
   gem 'activesupport', '~> 4.2', '>= 4.2.8'
   gem 'swagger-core'
+  gem 'mail'
 end
