@@ -2,6 +2,10 @@ s3:
   swagger:
     bucket: 'microservice-artifacts'
     key: 'lambda/template/swagger.yaml'
+  notification_template:
+    bucket: 'microservice-secrets'
+    key: 'NotificationEmailTemplate.html'
+
 
 composition_root_project: 'TemplateService.APIGatewayAdapter'
 

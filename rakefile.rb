@@ -283,7 +283,11 @@ def release_notification(application_name, build_number)
 
   release_notes.gsub!(/\r\n|\n/, '<br />')
 
-  notification_body = File.read(File.join(CONFIG_DIR, 'NotificationEmailTemplate.html'))
+  s3 = Aws::S3::Client.new()
+  notification_body = s3.get_object(
+    bucket: CONFIGURATION[:s3][:notification_template][:bucket],
+    key: CONFIGURATION[:s3][:notification_template][:key]
+  ).body.read
   notification_body.sub!('$APPLICATION_NAME', application_name)
   notification_body.sub!('$BUILD_NUMBER', build_number)
   notification_body.sub!('$RELEASE_NOTES', release_notes)
