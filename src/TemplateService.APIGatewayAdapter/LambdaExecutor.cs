@@ -17,14 +17,14 @@ namespace TemplateService.APIGatewayAdapter
     {
         private readonly IDispatcher _dispatcher;
         private readonly ILogger _lambdaLogger;
-        private readonly IPayloadConverter _payloadConverter;
+        private readonly IPayloadSerializer _payloadConverter;
 
         public LambdaExecutor() : this(
             new Dispatcher(TemplateServiceComposer.CreatePathHandlers(new HttpPathHandlerFactory(), JsonSerializerFactory.CreateJsonPayloadSerializer())),
             new LambdaLoggerWrapper(), JsonSerializerFactory.CreateJsonPayloadSerializer()) { }
 
 
-        internal LambdaExecutor(IDispatcher dispatcher, ILogger logger, IPayloadConverter payloadConverter)
+        internal LambdaExecutor(IDispatcher dispatcher, ILogger logger, IPayloadSerializer payloadConverter)
         {
             _dispatcher = dispatcher;
             _lambdaLogger = logger;
@@ -48,7 +48,7 @@ namespace TemplateService.APIGatewayAdapter
             }
             catch (ArgumentException e)
             {
-                return new APIGatewayProxyResponse {Body = _payloadConverter.ConvertToPayload(new {errorMessage = e.Message}), StatusCode = 405};
+                return new APIGatewayProxyResponse {Body = _payloadConverter.SerializePayload(new {errorMessage = e.Message}), StatusCode = 405};
             }
         }
 
@@ -71,7 +71,7 @@ namespace TemplateService.APIGatewayAdapter
         {
             return new APIGatewayProxyResponse
             {
-                Body = _payloadConverter.ConvertToPayload(restResponse.Body),
+                Body = _payloadConverter.SerializePayload(restResponse.Body),
                 Headers = restResponse.Headers,
                 StatusCode = restResponse.StatusCode
             };
