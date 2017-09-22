@@ -2,9 +2,9 @@
 {
     public class RestResponseFactory
     {
-        private readonly IPayloadConverter _payloadConverter;
+        private readonly IPayloadSerializer _payloadConverter;
 
-        public RestResponseFactory(IPayloadConverter payloadConverter)
+        public RestResponseFactory(IPayloadSerializer payloadConverter)
         {
             _payloadConverter = payloadConverter;
         }
@@ -35,7 +35,7 @@
         public RestResponse CreateErrorMessageRestResponse(string errorMessage)
         {
             var response = CreateCorsRestResponse();
-            response.Body = _payloadConverter.ConvertToPayload(new {errorMessage});
+            response.Body = _payloadConverter.SerializePayload(new {errorMessage});
             return response;
         }
     }

@@ -16,9 +16,10 @@ namespace RestfulMicroseverless
             };
         }
 
-        public static IPayloadConverter CreateJsonPayloadSerializer()
+        public static IPayloadSerializer CreateJsonPayloadSerializer()
         {
-            return new JsonPayloadConverter(CreateDefaultJsonSerializerSettings());
+            var settings = CreateDefaultJsonSerializerSettings();
+            return new JsonPayloadSerializer(JsonSerializer.Create(settings), settings);
         }
     }
 }
