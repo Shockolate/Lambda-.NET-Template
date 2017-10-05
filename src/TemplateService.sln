@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.14
+VisualStudioVersion = 15.0.26730.16
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AwsLibrary", "AwsLibrary\AwsLibrary.csproj", "{63D10EE9-A54F-46D5-AAB9-542E1D434ED8}"
 EndProject
@@ -11,9 +11,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RestfulMicroseverless", "Re
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RestfulMicroserverless.UnitTests", "RestfulMicroserverless.UnitTests\RestfulMicroserverless.UnitTests.csproj", "{6CC07ADD-0B7D-4298-A90D-68A40B5F0482}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TemplateService", "TemplateService\TemplateService.csproj", "{5B74E183-34DF-427C-B680-379599D81C69}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TemplateService", "TemplateService\TemplateService.csproj", "{5B74E183-34DF-427C-B680-379599D81C69}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TemplateService.APIGatewayAdapter", "TemplateService.APIGatewayAdapter\TemplateService.APIGatewayAdapter.csproj", "{B3084169-AD9D-4417-9B07-C64095A9CEE0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TemplateService.APIGatewayAdapter", "TemplateService.APIGatewayAdapter\TemplateService.APIGatewayAdapter.csproj", "{B3084169-AD9D-4417-9B07-C64095A9CEE0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TemplateService.APIGatewayAdapter.UnitTests", "TemplateService.APIGatewayAdapter.UnitTests\TemplateService.APIGatewayAdapter.UnitTests.csproj", "{485F5F40-A0BB-466C-AAFF-883761CE29BC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,8 +47,15 @@ Global
 		{B3084169-AD9D-4417-9B07-C64095A9CEE0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B3084169-AD9D-4417-9B07-C64095A9CEE0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B3084169-AD9D-4417-9B07-C64095A9CEE0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{485F5F40-A0BB-466C-AAFF-883761CE29BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{485F5F40-A0BB-466C-AAFF-883761CE29BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{485F5F40-A0BB-466C-AAFF-883761CE29BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{485F5F40-A0BB-466C-AAFF-883761CE29BC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A6F403AD-6E66-48FF-8088-C3AB09C29167}
 	EndGlobalSection
 EndGlobal

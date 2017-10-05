@@ -21,7 +21,7 @@ namespace RestfulMicroseverless
         public async Task<RestResponse> HandleAsync(RestRequest request, ILogger logger)
         {
             Logger = logger;
-            Logger.LogInfo($"Handling {request.Method} for {_route}");
+            Logger.LogInfo(() => $"Handling {request.Method} for {_route}");
             request.PathParameters = _route.BuildPathParameters(request.InvokedPath);
             return await _verbHandlers[request.Method].Invoke(request, logger);
         }

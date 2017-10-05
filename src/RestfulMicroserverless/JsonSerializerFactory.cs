@@ -12,7 +12,10 @@ namespace RestfulMicroseverless
             {
                 DefaultValueHandling = DefaultValueHandling.Ignore,
                 ContractResolver = new CamelCasePropertyNamesContractResolver(),
-                Formatting = Formatting.Indented
+                Formatting = Formatting.Indented,
+                DateFormatHandling = DateFormatHandling.IsoDateFormat,
+                NullValueHandling = NullValueHandling.Include,
+                MissingMemberHandling = MissingMemberHandling.Error
             };
         }
 

@@ -27,12 +27,12 @@ namespace RestfulMicroseverless
             // Thrown when no valid handlers, or more than one valid handler.
             catch (InvalidOperationException)
             {
-                logger.LogError($"No Singular Matching Handler found for {request.Method}, {request.InvokedPath}");
+                logger.LogError(() => $"No Singular Matching Handler found for {request.Method}, {request.InvokedPath}");
                 return _restResponseFactory.CreateMethodNotAllowedWithCorsRestResponse(request.Method, request.InvokedPath);
             }
             catch (Exception e)
             {
-                logger.LogError(e.Message);
+                logger.LogError(() => e.Message);
                 var response = _restResponseFactory.CreateErrorMessageRestResponse($"InternalServerError: {e.Message}");
                 // 500 - Internal Server Error
                 response.StatusCode = 500;

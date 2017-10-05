@@ -1,4 +1,6 @@
-﻿namespace RestfulMicroserverless.Contracts
+﻿using System;
+
+namespace RestfulMicroserverless.Contracts
 {
     public interface ILogger
     {
@@ -8,8 +10,8 @@
             set;
         }
 
-        void LogError(string message);
-        void LogInfo(string message);
-        void LogDebug(string message);
+        void LogError(Func<string> messageDelegate);
+        void LogInfo(Func<string> messageDelegate);
+        void LogDebug(Func<string> messageDelegate);
     }
 }
