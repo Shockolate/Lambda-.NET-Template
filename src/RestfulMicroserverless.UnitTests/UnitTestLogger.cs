@@ -11,31 +11,31 @@ namespace RestfulMicroserverless.UnitTests
         }
 
         public Verbosity Verbosity { get; set; }
-        public void LogError(string message)
+        public void LogError(Func<string> messageDelegate)
         {
             if (Verbosity == Verbosity.Silent)
             {
                 return;
             }
-            Console.WriteLine($"ERROR: {message}");
+            Console.WriteLine($"ERROR: {messageDelegate.Invoke()}");
         }
 
-        public void LogInfo(string message)
+        public void LogInfo(Func<string> messageDelegate)
         {
             if (Verbosity == Verbosity.Silent)
             {
                 return;
             }
-            Console.WriteLine($"INFO: {message}");
+            Console.WriteLine($"INFO: {messageDelegate.Invoke()}");
         }
 
-        public void LogDebug(string message)
+        public void LogDebug(Func<string> messageDelegate)
         {
             if (Verbosity == Verbosity.Silent)
             {
                 return;
             }
-            Console.WriteLine($"DEBUG: {message}");
+            Console.WriteLine($"DEBUG: {messageDelegate.Invoke()}");
         }
     }
 }

@@ -1,9 +1,11 @@
 ﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 using Amazon.Lambda.APIGatewayEvents;
 using Amazon.Lambda.Core;
 using Amazon.Lambda.Serialization.Json;
 using AwsLibrary;
+using Microsoft.Extensions.Configuration;
 using RestfulMicroserverless.Contracts;
 using RestfulMicroseverless;
 
@@ -19,16 +21,20 @@ namespace TemplateService.APIGatewayAdapter
         private readonly ILogger _lambdaLogger;
         private readonly IPayloadSerializer _payloadConverter;
 
-        public LambdaExecutor() : this(
-            new Dispatcher(TemplateServiceComposer.CreatePathHandlers(new HttpPathHandlerFactory(), JsonSerializerFactory.CreateJsonPayloadSerializer())),
-            new LambdaLoggerWrapper(), JsonSerializerFactory.CreateJsonPayloadSerializer()) { }
+        public LambdaExecutor() : this(new LambdaLoggerWrapper(), JsonSerializerFactory.CreateJsonPayloadSerializer(),
+            new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddInMemoryCollection( /* default config strings */)
+                .AddJsonFile("TemplateService.settings", true, true).Build()) { }
 
 
-        internal LambdaExecutor(IDispatcher dispatcher, ILogger logger, IPayloadSerializer payloadConverter)
+        public LambdaExecutor(ILogger logger, IPayloadSerializer payloadSerializer, IConfiguration configuration) : this(
+            new Dispatcher(TemplateServiceComposer.CreatePathHandlers(new HttpPathHandlerFactory(), payloadSerializer, configuration)), logger,
+            payloadSerializer) { }
+
+        internal LambdaExecutor(IDispatcher dispatcher, ILogger logger, IPayloadSerializer payloadSerializer)
         {
             _dispatcher = dispatcher;
             _lambdaLogger = logger;
-            _payloadConverter = payloadConverter;
+            _payloadConverter = payloadSerializer;
         }
 
         public async Task<APIGatewayProxyResponse> ApiGatewayProxyInvocation(APIGatewayProxyRequest apiGatewayProxyRequest, ILambdaContext context)
@@ -37,9 +43,8 @@ namespace TemplateService.APIGatewayAdapter
             if (apiGatewayProxyRequest.StageVariables.ContainsKey("verbosity"))
                 Enum.TryParse(apiGatewayProxyRequest.StageVariables["verbosity"], out targetVerbosity);
             _lambdaLogger.Verbosity = targetVerbosity;
-            _lambdaLogger.LogDebug("Invoked!");
-
-            apiGatewayProxyRequest.LogEventDebug(_lambdaLogger);
+            _lambdaLogger.LogDebug(() => "Invoked!");
+            _lambdaLogger.LogDebug(() => ApiGatewayProxyHelpers.ProxyRequestToString(apiGatewayProxyRequest));
             try
             {
                 var restRequest = CreateRestRequest(apiGatewayProxyRequest);

@@ -6,42 +6,49 @@ namespace AwsLibrary
 {
     public class LambdaLoggerWrapper : ILogger
     {
-        private Verbosity _verbosity;
-
         public LambdaLoggerWrapper() : this(Verbosity.Silent) { }
 
         public LambdaLoggerWrapper(Verbosity verbosityLevel)
         {
             if (!Enum.IsDefined(typeof(Verbosity), verbosityLevel))
                 throw new ArgumentOutOfRangeException(nameof(verbosityLevel), "Value should be defined in the Verbosity enum.");
-            _verbosity = verbosityLevel;
+            Verbosity = verbosityLevel;
         }
 
         public LambdaLoggerWrapper(string verbosityLevel)
         {
-            if (verbosityLevel == null || !Enum.TryParse(verbosityLevel, out _verbosity)) _verbosity = Verbosity.Debug;
-        }
-
-        public void SetVerbosity(Verbosity verbosityLevel)
-        {
-            _verbosity = verbosityLevel;
+            if (verbosityLevel == null || !Enum.TryParse(verbosityLevel, out Verbosity verbosity))
+                Verbosity = Verbosity.Debug;
+            else
+                Verbosity = verbosity;
         }
 
         public Verbosity Verbosity { get; set; }
+
+        public void LogError(Func<string> messageDelegate)
+        {
+            if (IsLoggable(Verbosity.Error))
+                LambdaLogger.Log(FormatLogMessage("ERROR", messageDelegate.Invoke()));
+        }
+
+        public void LogInfo(Func<string> messageDelegate)
+        {
+            if (IsLoggable(Verbosity.Info)) LambdaLogger.Log(FormatLogMessage("INFO", messageDelegate.Invoke()));
+        }
+
+        public void LogDebug(Func<string> messageDelegate)
+        {
+            if (IsLoggable(Verbosity.Debug)) LambdaLogger.Log(FormatLogMessage("DEBUG", messageDelegate.Invoke()));
+        }
 
         public void LogError(string message)
         {
             if (IsLoggable(Verbosity.Error)) LambdaLogger.Log(FormatLogMessage("ERROR", message));
         }
 
-        public void LogInfo(string message)
+        public void SetVerbosity(Verbosity verbosityLevel)
         {
-            if (IsLoggable(Verbosity.Info)) LambdaLogger.Log(FormatLogMessage("INFO", message));
-        }
-
-        public void LogDebug(string message)
-        {
-            if (IsLoggable(Verbosity.Debug)) LambdaLogger.Log(FormatLogMessage("DEBUG", message));
+            Verbosity = verbosityLevel;
         }
 
         private static string FormatLogMessage(string level, string message)
@@ -51,7 +58,7 @@ namespace AwsLibrary
 
         private bool IsLoggable(Verbosity logLevel)
         {
-            switch (_verbosity)
+            switch (Verbosity)
             {
                 case Verbosity.Error:
                     switch (logLevel)
