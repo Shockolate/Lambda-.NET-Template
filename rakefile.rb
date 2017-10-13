@@ -296,7 +296,7 @@ def release_notification(application_name, build_number)
   t1 = Time.now
   notification = Mail.new do
     from    'MSWProductionShopfloor@vistaprint.com'
-    to      'MSWProductionShopfloorReleaseNotifications@vistaprint.com'
+    to      'MSWProductionShopfloor@vistaprint.com'
     subject "New Release to #{application_name} - A Shopfloor Service"
     body    notification_body
   end
