@@ -312,5 +312,5 @@ end
 
 def delete_release_notes()
   FileUtils.rm(File.join(ROOT, 'ReleaseNotes.txt'))
-  raise 'Error deleting the release notes file!' unless system('git add ReleaseNotes.txt --no-ignore-removal && git commit -m "Deleted ReleaseNotes.txt on Merge Job." && git push origin master')
+  raise 'Error deleting the release notes file!' unless system('git add ReleaseNotes.txt --no-ignore-removal && git commit --author="Jenkins <mswproductionshopfloor@vistaprint.com>" -m "Deleted ReleaseNotes.txt on Merge Job." && git push origin master')
 end
