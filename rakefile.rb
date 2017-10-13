@@ -312,5 +312,5 @@ end
 
 def delete_release_notes()
   FileUtils.rm(File.join(ROOT, 'ReleaseNotes.txt'))
-  raise 'Error committing ReleaseNotes deletion!' unless system('git add ReleaseNotes.txt --no-ignore-removal && git commit --author="Automatic Jenkins <mswproductionshopfloor@vistaprint.com" -m "Automatic deletion of ReleaseNotes.txt"')
+  raise 'Error committing ReleaseNotes deletion!' unless system('git add ReleaseNotes.txt --no-ignore-removal && git commit --author="Automatic Jenkins <mswproductionshopfloor@vistaprint.com>" -m "Automatic deletion of ReleaseNotes.txt"')
 end
