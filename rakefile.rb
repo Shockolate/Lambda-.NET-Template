@@ -296,7 +296,7 @@ def release_notification(application_name, build_number)
   t1 = Time.now
   notification = Mail.new do
     from    'MSWProductionShopfloor@vistaprint.com'
-    to      'MSWProductionShopfloorReleaseNotifications@vistaprint.com'
+    to      'MSWProductionShopfloor@vistaprint.com'
     subject "New Release to #{application_name} - A Shopfloor Service"
     body    notification_body
   end
@@ -306,4 +306,11 @@ def release_notification(application_name, build_number)
   notification.deliver!
   t2 = Time.now
   puts "Sent Email Notification! #{t2 - t1}"
+
+  delete_release_notes
+end
+
+def delete_release_notes()
+  FileUtils.rm(File.join(ROOT, 'ReleaseNotes.txt'))
+  raise 'Error deleting the release notes file!' unless system('git add ReleaseNotes.txt --no-ignore-removal && git commit -m "Deleted ReleaseNotes.txt on Merge Job." && git push origin master')
 end
