@@ -11,6 +11,7 @@ namespace RestfulMicroserverless.UnitTests
         }
 
         public Verbosity Verbosity { get; set; }
+
         public void LogError(Func<string> messageDelegate)
         {
             if (Verbosity == Verbosity.Silent)

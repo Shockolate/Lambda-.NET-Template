@@ -12,17 +12,30 @@ namespace AwsLibrary
             if (req.Headers != null)
             {
                 stringBuilder.AppendLine("Headers: ");
-                foreach (var kvp in req.Headers) stringBuilder.AppendLine(string.Format("    Key = {0}, Value = {1}", kvp.Key, kvp.Value));
+                foreach (var kvp in req.Headers)
+                {
+                    stringBuilder.AppendLine(string.Format("    Key = {0}, Value = {1}", kvp.Key, kvp.Value));
+                }
             }
             stringBuilder.AppendLine(string.Format("HttpMethod: {0}", req.HttpMethod));
             stringBuilder.AppendLine(string.Format("Path: {0}", req.Path));
             stringBuilder.AppendLine("PathParameters: ");
             if (req.PathParameters != null)
-                foreach (var kvp in req.PathParameters) stringBuilder.AppendLine(string.Format("    Key = {0}, Value = {1}", kvp.Key, kvp.Value));
+            {
+                foreach (var kvp in req.PathParameters)
+                {
+                    stringBuilder.AppendLine(string.Format("    Key = {0}, Value = {1}", kvp.Key, kvp.Value));
+                }
+            }
 
             stringBuilder.AppendLine("QueryStringParameters: ");
             if (req.QueryStringParameters != null)
-                foreach (var kvp in req.QueryStringParameters) stringBuilder.AppendLine(string.Format("    Key = {0}, Value = {1}", kvp.Key, kvp.Value));
+            {
+                foreach (var kvp in req.QueryStringParameters)
+                {
+                    stringBuilder.AppendLine(string.Format("    Key = {0}, Value = {1}", kvp.Key, kvp.Value));
+                }
+            }
             if (req.RequestContext != null)
             {
                 stringBuilder.AppendLine("ProxyRequestContext:");
@@ -56,7 +69,12 @@ namespace AwsLibrary
 
             stringBuilder.AppendLine("StageVariables:");
             if (req.StageVariables != null)
-                foreach (var kvp in req.StageVariables) stringBuilder.AppendLine(string.Format("    Key = {0}, Value = {1}", kvp.Key, kvp.Value));
+            {
+                foreach (var kvp in req.StageVariables)
+                {
+                    stringBuilder.AppendLine(string.Format("    Key = {0}, Value = {1}", kvp.Key, kvp.Value));
+                }
+            }
 
             return stringBuilder.ToString();
         }

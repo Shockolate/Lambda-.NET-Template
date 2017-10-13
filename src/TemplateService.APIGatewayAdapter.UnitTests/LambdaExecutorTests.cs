@@ -10,7 +10,6 @@ namespace TemplateService.APIGatewayAdapter.UnitTests
         {
             Assert.DoesNotThrow(() =>
             {
-
                 var executor = new LambdaExecutor();
                 Assert.That(executor, Is.Not.Null);
             });

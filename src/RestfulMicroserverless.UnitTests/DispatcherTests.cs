@@ -25,10 +25,20 @@ namespace RestfulMicroserverless.UnitTests
             return Task.FromResult(response);
         }
 
-        private static Task<RestResponse> _exceptionThrowingVerbHandler(RestRequest request, ILogger logger)
+        private Task<RestResponse> _getFulfilledItemAsync(RestRequest request, ILogger logger)
         {
-            throw new Exception("Database is down.");
+            var response = _restResponseFactory.CreateCorsRestResponse();
+            response.StatusCode = 200;
+            response.Body = new
+            {
+                fulfilledItem = $"#{request.PathParameters["id"]}",
+                tenant = request.Headers["tenant"],
+                cancelled = request.QueryStringParameters["cancelled"]
+            };
+            return Task.FromResult(response);
         }
+
+        private static Task<RestResponse> _exceptionThrowingVerbHandler(RestRequest request, ILogger logger) => throw new Exception("Database is down.");
 
         [OneTimeSetUp]
         public void Init()
@@ -36,7 +46,9 @@ namespace RestfulMicroserverless.UnitTests
             _successfulPathHandlers = new List<IHttpPathHandler>
             {
                 _pathHandlerFactory.CreateHttpPathHandler("v1/fulfilleditems",
-                    new Dictionary<HttpVerb, Func<RestRequest, ILogger, Task<RestResponse>>> {{HttpVerb.Post, _postFulfilledItemAsync}})
+                    new Dictionary<HttpVerb, Func<RestRequest, ILogger, Task<RestResponse>>> {{HttpVerb.Post, _postFulfilledItemAsync}}),
+                _pathHandlerFactory.CreateHttpPathHandler("v1/fulfilleditems/{id}",
+                    new Dictionary<HttpVerb, Func<RestRequest, ILogger, Task<RestResponse>>> {{HttpVerb.Get, _getFulfilledItemAsync}})
             };
 
             _noMatchingHandlerPathHandlers = _successfulPathHandlers;
@@ -49,13 +61,34 @@ namespace RestfulMicroserverless.UnitTests
         }
 
         [Test]
+        public void SetMethodSuccessfullyTest()
+        {
+            Assert.DoesNotThrow(() =>
+            {
+                var restRequest = new RestRequest {Method = HttpVerb.Get};
+                Assert.That(restRequest, Is.Not.Null);
+                Assert.That(restRequest.Method, Is.EqualTo(HttpVerb.Get));
+            });
+        }
+
+        [Test]
+        public void SetMethodToGetWithBodyFailsTest()
+        {
+            Assert.Throws<ArgumentException>(() =>
+            {
+                var request = new RestRequest {Body = @"{ ""valid"": ""JSON""}", Method = HttpVerb.Get};
+                Assert.That(request, Is.Null); // should not get here.
+            });
+        }
+
+        [Test]
         public void TestDispatcherSuccessfullyDispatches()
         {
             var dispatcher = new Dispatcher(_successfulPathHandlers);
             var request = new RestRequest {InvokedPath = "v1/fulfilleditems", Body = "{\"foo\":\"bar\"}", Method = HttpVerb.Post};
             RestResponse response = null;
 
-            Assert.DoesNotThrow(delegate { response = dispatcher.DispatchAsync(request, _logger).Result; });
+            Assert.DoesNotThrow(() => response = dispatcher.DispatchAsync(request, _logger).Result);
             Assert.That(response, Is.Not.Null);
             Assert.That(response.StatusCode, Is.EqualTo(201));
         }
@@ -67,7 +100,7 @@ namespace RestfulMicroserverless.UnitTests
             var request = new RestRequest {InvokedPath = "not/a/real/path", Body = "{\"foo\":\"bar\"}", Method = HttpVerb.Post};
             RestResponse response = null;
 
-            Assert.DoesNotThrow(delegate { response = dispatcher.DispatchAsync(request, _logger).Result; });
+            Assert.DoesNotThrow(() => response = dispatcher.DispatchAsync(request, _logger).Result);
             Assert.That(response, Is.Not.Null);
             Assert.That(response.StatusCode, Is.EqualTo(405));
         }
@@ -79,7 +112,7 @@ namespace RestfulMicroserverless.UnitTests
             var request = new RestRequest {InvokedPath = "v1/fulfilleditems", Method = HttpVerb.Get};
             RestResponse response = null;
 
-            Assert.DoesNotThrow(delegate { response = dispatcher.DispatchAsync(request, _logger).Result; });
+            Assert.DoesNotThrow(() => response = dispatcher.DispatchAsync(request, _logger).Result);
             Assert.That(response, Is.Not.Null);
             Assert.That(response.StatusCode, Is.EqualTo(405));
         }
@@ -91,9 +124,26 @@ namespace RestfulMicroserverless.UnitTests
             var request = new RestRequest {InvokedPath = "throw/exception", Method = HttpVerb.Get};
             RestResponse response = null;
 
-            Assert.DoesNotThrow(delegate { response = dispatcher.DispatchAsync(request, _logger).Result; });
+            Assert.DoesNotThrow(() => response = dispatcher.DispatchAsync(request, _logger).Result);
             Assert.That(response, Is.Not.Null);
             Assert.That(response.StatusCode, Is.EqualTo(500));
+        }
+
+        [Test]
+        public void TestDispatcherSuccessfullyUsesPathParametersHeadersAndQueryParameters()
+        {
+            var dispatcher = new Dispatcher(_successfulPathHandlers);
+            var request = new RestRequest
+            {
+                InvokedPath = "v1/fulfilleditems/123",
+                QueryStringParameters = new Dictionary<string, string> {{"cancelled", "true"}},
+                Method = HttpVerb.Get,
+                Headers = new Dictionary<string, string> {{"tenant", "UnitTestTenant"}}
+            };
+            RestResponse response = null;
+            Assert.DoesNotThrow(() => response = dispatcher.DispatchAsync(request, _logger).Result);
+            Assert.That(response, Is.Not.Null);
+            Assert.That(response.StatusCode, Is.EqualTo(200));
         }
     }
 }

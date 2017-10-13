@@ -11,16 +11,22 @@ namespace AwsLibrary
         public LambdaLoggerWrapper(Verbosity verbosityLevel)
         {
             if (!Enum.IsDefined(typeof(Verbosity), verbosityLevel))
+            {
                 throw new ArgumentOutOfRangeException(nameof(verbosityLevel), "Value should be defined in the Verbosity enum.");
+            }
             Verbosity = verbosityLevel;
         }
 
         public LambdaLoggerWrapper(string verbosityLevel)
         {
             if (verbosityLevel == null || !Enum.TryParse(verbosityLevel, out Verbosity verbosity))
+            {
                 Verbosity = Verbosity.Debug;
+            }
             else
+            {
                 Verbosity = verbosity;
+            }
         }
 
         public Verbosity Verbosity { get; set; }
@@ -28,22 +34,33 @@ namespace AwsLibrary
         public void LogError(Func<string> messageDelegate)
         {
             if (IsLoggable(Verbosity.Error))
+            {
                 LambdaLogger.Log(FormatLogMessage("ERROR", messageDelegate.Invoke()));
+            }
         }
 
         public void LogInfo(Func<string> messageDelegate)
         {
-            if (IsLoggable(Verbosity.Info)) LambdaLogger.Log(FormatLogMessage("INFO", messageDelegate.Invoke()));
+            if (IsLoggable(Verbosity.Info))
+            {
+                LambdaLogger.Log(FormatLogMessage("INFO", messageDelegate.Invoke()));
+            }
         }
 
         public void LogDebug(Func<string> messageDelegate)
         {
-            if (IsLoggable(Verbosity.Debug)) LambdaLogger.Log(FormatLogMessage("DEBUG", messageDelegate.Invoke()));
+            if (IsLoggable(Verbosity.Debug))
+            {
+                LambdaLogger.Log(FormatLogMessage("DEBUG", messageDelegate.Invoke()));
+            }
         }
 
         public void LogError(string message)
         {
-            if (IsLoggable(Verbosity.Error)) LambdaLogger.Log(FormatLogMessage("ERROR", message));
+            if (IsLoggable(Verbosity.Error))
+            {
+                LambdaLogger.Log(FormatLogMessage("ERROR", message));
+            }
         }
 
         public void SetVerbosity(Verbosity verbosityLevel)
@@ -51,10 +68,7 @@ namespace AwsLibrary
             Verbosity = verbosityLevel;
         }
 
-        private static string FormatLogMessage(string level, string message)
-        {
-            return $"{level}: {message}{Environment.NewLine}";
-        }
+        private static string FormatLogMessage(string level, string message) => $"{level}: {message}{Environment.NewLine}";
 
         private bool IsLoggable(Verbosity logLevel)
         {

@@ -30,7 +30,10 @@ GEM
     mime-types (3.1)
       mime-types-data (~> 3.2015)
     mime-types-data (3.2016.0521)
+    mini_portile2 (2.1.0)
     minitest (5.10.3)
+    nokogiri (1.6.8.1-x86-mingw32)
+      mini_portile2 (~> 2.1.0)
     public_suffix (3.0.0)
     rake (12.0.0)
     rubyzip (1.2.1)
@@ -52,9 +55,10 @@ DEPENDENCIES
   json (~> 1)!
   lambda_wrap (~> 1)!
   mail!
+  nokogiri!
   rake (>= 11)!
   rubyzip (~> 1.2)!
   swagger-core!
 
 BUNDLED WITH
-   1.14.3
+   1.15.4

@@ -1,4 +1,5 @@
-﻿namespace RestfulMicroserverless.Contracts {
+﻿namespace RestfulMicroserverless.Contracts
+{
     public enum Verbosity
     {
         Silent,

@@ -41,7 +41,9 @@ namespace TemplateService.APIGatewayAdapter
         {
             var targetVerbosity = Verbosity.Silent;
             if (apiGatewayProxyRequest.StageVariables.ContainsKey("verbosity"))
+            {
                 Enum.TryParse(apiGatewayProxyRequest.StageVariables["verbosity"], out targetVerbosity);
+            }
             _lambdaLogger.Verbosity = targetVerbosity;
             _lambdaLogger.LogDebug(() => "Invoked!");
             _lambdaLogger.LogDebug(() => ApiGatewayProxyHelpers.ProxyRequestToString(apiGatewayProxyRequest));
@@ -61,7 +63,9 @@ namespace TemplateService.APIGatewayAdapter
         {
             HttpVerb invokedHttpVerb;
             if (!Enum.TryParse(apiGatewayProxyRequest.HttpMethod, true, out invokedHttpVerb))
+            {
                 throw new ArgumentException($"HttpMethod: {apiGatewayProxyRequest.HttpMethod} not supported.");
+            }
             return new RestRequest
             {
                 Body = apiGatewayProxyRequest.Body,
@@ -72,14 +76,11 @@ namespace TemplateService.APIGatewayAdapter
             };
         }
 
-        private APIGatewayProxyResponse CreateApiGatewayProxyResponse(RestResponse restResponse)
+        private APIGatewayProxyResponse CreateApiGatewayProxyResponse(RestResponse restResponse) => new APIGatewayProxyResponse
         {
-            return new APIGatewayProxyResponse
-            {
-                Body = _payloadConverter.SerializePayload(restResponse.Body),
-                Headers = restResponse.Headers,
-                StatusCode = restResponse.StatusCode
-            };
-        }
+            Body = _payloadConverter.SerializePayload(restResponse.Body),
+            Headers = restResponse.Headers,
+            StatusCode = restResponse.StatusCode
+        };
     }
 }

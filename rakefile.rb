@@ -1,3 +1,5 @@
+::USING_WINDOWS = !!((RUBY_PLATFORM =~ /(win|w)(32|64)$/) || (RUBY_PLATFORM=~ /mswin|mingw/))
+
 require 'aws-sdk'
 Aws.use_bundled_cert!
 require 'rake'
@@ -11,6 +13,9 @@ require 'forwardable'
 require 'swagger'
 require 'active_support/core_ext/hash'
 require 'mail'
+require 'nokogiri'
+require 'pathname'
+
 
 STDOUT.sync = true
 STDERR.sync = true
@@ -28,13 +33,13 @@ CLEAN.include(REPORTS_DIR)
 
 # Developer tasks
 desc 'Compiles the source code to binaries.'
-task :build => [:clean, :parse_config, :retrieve, :dotnet_build]
+task :build => [:clean, :parse_config, :retrieve, :dotnet_build, :lint]
 desc 'Builds and runs unit tests.'
 task :test => [:build, :unit_test]
 
 # Commit Targets
-task :merge_job  => [:clean, :parse_config, :retrieve, :lint, :dotnet_build, :unit_test, :package, :deploy_production, :release_notification]
-task :pull_request_job => [:clean, :parse_config, :retrieve, :lint, :dotnet_build, :unit_test, :package, :deploy_test]
+task :merge_job  => [:build, :test, :package, :deploy_production, :release_notification]
+task :pull_request_job => [:build, :test, :package, :deploy_test]
 
 task :deploy_production => [:parse_config, :build, :package] do
   deploy(:production)
@@ -73,32 +78,53 @@ end
 # Workflow tasks
 desc 'Retrieves external dependencies. Calls "dotnet restore"'
 task :retrieve do
-  Dir["#{SRC_DIR}/**/*.csproj"].each do |csproj_path|
-    raise "Dependency installation failed for #{csproj_path}" unless system("dotnet restore #{csproj_path} --verbosity normal")
-  end
+  cmd = "dotnet restore --verbosity normal"
+  puts "Running Command: #{cmd}"
+  raise "Dependency installation failed." unless system(cmd)
 end
 
 desc 'Runs Unit tests located in the src/UnitTests project.'
 task :unit_test do
   Dir["#{SRC_DIR}/**/*.UnitTests/*.csproj"].each do |csproj_path|
-    raise "Error running unit tests: #{csproj_path}" unless system("dotnet test #{csproj_path} --no-build --logger:trx;LogFileName=#{File.join(REPORTS_DIR, 'testresults.trx')}")
+    cmd = "dotnet test #{csproj_path} --no-build --logger:trx;LogFileName=#{File.join(REPORTS_DIR, 'testresults.trx')}"
+    puts "Running Command: #{cmd}"
+    raise "Error running unit tests: #{csproj_path}" unless system(cmd)
   end
 end
 
 task :dotnet_build do
+  puts "Dotnet Build...."
+  t1 = Time.now
   Dir["#{SRC_DIR}/**/*.csproj"].each do |csproj_path|
-    raise "Error building: #{csproj_path}" unless system("dotnet build #{csproj_path} --framework netcoreapp1.1")
+    cmd = "dotnet build #{csproj_path} --no-restore --framework=netcoreapp1.1"
+    puts "Running Command: #{cmd}"
+    raise "Error Building Project: #{csproj_path}" unless system(cmd)
   end
+
+  cmd = "dotnet build --no-restore --framework=netcoreapp1.1"
+  puts "Running Command: #{cmd}"
+  raise "Error building Solution." unless system(cmd)
+
+  t2 = Time.now
+
+  puts "Finished Dotnet Build #{t2 - t1}"
 end
 
 task :lint do
-  begin
-    Swagger.load(File.join(CONFIG_DIR, 'ClientSwagger.yaml'))
-    puts 'Valid swagger file.'
-  rescue Exception => e
-    puts e.message
-    raise 'Invalid Swagger File!'
+  puts 'Linting....'
+  t1 = Time.now
+
+  lint_swagger
+  lint_code
+  linting_results = parse_linting_results
+
+  unless linting_results.empty?
+    puts linting_results
+    # ommitting the failure until R# Works with Jenkins.
+    # raise 'Failed Linting.'
   end
+  t2 = Time.now
+  puts "Finished linting: #{t2 - t1}"
 end
 
 desc 'Creates a package for deployment.'
@@ -132,6 +158,9 @@ task :parse_config do
     delivery_method :smtp, address: 'relay.vistaprint.net', port: 25
   end
 
+  FileUtils.mkdir(PACKAGE_DIR, verbose: true) unless Dir.exists?(PACKAGE_DIR)
+  FileUtils.mkdir(REPORTS_DIR, verbose: true) unless Dir.exists?(REPORTS_DIR)
+
   puts 'parsed. '
 end
 
@@ -152,11 +181,9 @@ end
 def package()
   puts 'Creating the deployment package...'
   t1 = Time.now
-
-  FileUtils.mkdir(PACKAGE_DIR, verbose: true)
   cmd = "dotnet publish #{File.join(SRC_DIR, CONFIGURATION[:composition_root_project])} --configuration Release --framework netcoreapp1.1 --output #{PACKAGE_DIR} --verbosity normal"
-  raise 'Error creating deployment package.' if !system(cmd)
-
+  puts "Running Command: #{cmd}"
+  raise 'Error creating deployment package.' unless system(cmd)
 
   zip_package
 
@@ -312,5 +339,65 @@ end
 
 def delete_release_notes()
   FileUtils.rm(File.join(ROOT, 'ReleaseNotes.txt'))
-  raise 'Error committing ReleaseNotes deletion!' unless system('git add ReleaseNotes.txt --no-ignore-removal && git commit --author="Automatic Jenkins <mswproductionshopfloor@vistaprint.com>" -m "Automatic deletion of ReleaseNotes.txt"')
+  cmd = 'git add ReleaseNotes.txt --no-ignore-removal && git commit --author="Automatic Jenkins <mswproductionshopfloor@vistaprint.com>" -m "Automatic deletion of ReleaseNotes.txt"'
+  puts "Running Command: #{cmd}"
+  raise 'Error committing ReleaseNotes deletion!' unless system(cmd)
+end
+
+def lint_swagger()
+  begin
+    Swagger.load(File.join(CONFIG_DIR, 'ClientSwagger.yaml'))
+    puts 'Valid swagger file.'
+  rescue Exception => e
+    puts e.message
+    raise 'Invalid Swagger File!'
+  end
+end
+
+def lint_code()
+  cmd = "inspectcode \"#{Dir[File.join(ROOT, '*.sln')].first}\" --output=\"#{File.join(REPORTS_DIR, 'LintResults.xml')}\" --profile=\"#{Dir[File.join(ROOT, '*.sln.DotSettings')].first}\" --severity=WARNING --toolset=15.0".gsub!(/\//, '\\') # for some reason, inspectcode can't resolve the Forward Slash seperator.
+  puts "Running Command: #{cmd}"
+  output = `#{cmd}`
+  puts output
+  puts $?
+  raise 'Error linting code.' unless $?.exitstatus == 0
+end
+
+def parse_linting_results()
+  lint_results_xml = Nokogiri::XML(File.open(File.join(REPORTS_DIR, 'LintResults.xml')))
+  issue_types = Hash.new
+  lint_results_xml.xpath("//IssueType").map do |issue_type_node|
+    severity = issue_type_node['Severity']
+    case severity
+    when 'ERROR', 'WARNING'
+      issue_types[issue_type_node['Id']] = Hash[:category => issue_type_node['Category'], :description => issue_type_node['Description'], :severity => severity]
+    end
+  end
+
+  output_string = String.new
+  lint_results_xml.xpath("//Issue").each do |issue_node|
+    issue_type = issue_types[issue_node['TypeId']]
+    unless issue_type.nil?
+      output_string << issue_type[:severity] << ':' << "#{issue_type[:severity] == 'WARNING' ? "\t" : "\t\t"}"
+      output_string << issue_type[:category] << "\t"
+      output_string << issue_node['File'] << ':'
+
+      if issue_node.key?('Line')
+        output_string << issue_node['Line']
+      else
+        output_string << '0'
+      end
+
+      unless issue_type[:description].empty?
+        output_string << " - #{issue_type[:description]}"
+      end
+
+      unless issue_node['Message'].empty?
+        output_string << " - #{issue_node['Message']}"
+      end
+
+      output_string << "\n"
+    end
+  end
+  output_string
 end

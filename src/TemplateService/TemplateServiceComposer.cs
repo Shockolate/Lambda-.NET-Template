@@ -7,7 +7,8 @@ namespace TemplateService
 {
     public static class TemplateServiceComposer
     {
-        public static IEnumerable<IHttpPathHandler> CreatePathHandlers(IHttpPathHandlerFactory pathHandlerFactory, IPayloadSerializer payloadSerializer, IConfiguration configuration)
+        public static IEnumerable<IHttpPathHandler> CreatePathHandlers(IHttpPathHandlerFactory pathHandlerFactory, IPayloadSerializer payloadSerializer,
+            IConfiguration configuration)
         {
             // Use Configuration.
             var restResponseFactory = new RestResponseFactory(payloadSerializer);
