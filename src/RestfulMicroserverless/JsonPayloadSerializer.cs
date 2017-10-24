@@ -15,10 +15,7 @@ namespace RestfulMicroseverless
             _jsonSerializerSettings = jsonSerializerSettings;
         }
 
-        public string SerializePayload(object objectToConvert)
-        {
-            return JsonConvert.SerializeObject(objectToConvert, _jsonSerializerSettings);
-        }
+        public string SerializePayload(object objectToConvert) => JsonConvert.SerializeObject(objectToConvert, _jsonSerializerSettings);
 
         public void SerializePayload(object objectToConvert, Stream targetStream)
         {

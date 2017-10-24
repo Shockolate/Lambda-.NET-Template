@@ -17,20 +17,25 @@ namespace RestfulMicroseverless
 
         public string PathTemplate { get; }
 
-        public override string ToString()
-        {
-            return PathTemplate;
-        }
+        public override string ToString() => PathTemplate;
 
         public bool Matches(string invokedPath)
         {
             var invokedSegments = invokedPath.Split('/').ToList();
-            if (_routeSegments.Count != invokedSegments.Count) return false;
+            if (_routeSegments.Count != invokedSegments.Count)
+            {
+                return false;
+            }
             using (var routeSegmentsEnumerator = _routeSegments.GetEnumerator())
             using (var invokedSegmentsEnumerator = invokedSegments.GetEnumerator())
             {
                 while (routeSegmentsEnumerator.MoveNext() && invokedSegmentsEnumerator.MoveNext())
-                    if (!routeSegmentsEnumerator.Current.Matches(invokedSegmentsEnumerator.Current)) return false;
+                {
+                    if (!routeSegmentsEnumerator.Current.Matches(invokedSegmentsEnumerator.Current))
+                    {
+                        return false;
+                    }
+                }
             }
             return true;
         }
@@ -45,7 +50,10 @@ namespace RestfulMicroseverless
                 while (routeSegmentsEnumerator.MoveNext() && invokedSegmentsEnumerator.MoveNext())
                 {
                     var currentSegment = routeSegmentsEnumerator.Current;
-                    if (currentSegment.IsPathParameter) pathParameterDictionary.Add(currentSegment.PathParameterKey, invokedSegmentsEnumerator.Current);
+                    if (currentSegment.IsPathParameter)
+                    {
+                        pathParameterDictionary.Add(currentSegment.PathParameterKey, invokedSegmentsEnumerator.Current);
+                    }
                 }
             }
             return pathParameterDictionary;
@@ -71,15 +79,15 @@ namespace RestfulMicroseverless
             {
                 get
                 {
-                    if (!IsPathParameter) throw new ArgumentException("Cannot get the PathParameter key if the RouteSegment is not a PathParameter.");
+                    if (!IsPathParameter)
+                    {
+                        throw new ArgumentException("Cannot get the PathParameter key if the RouteSegment is not a PathParameter.");
+                    }
                     return _pathParameterKey;
                 }
             }
 
-            public bool Matches(string invokedSegment)
-            {
-                return _segmentPattern.IsMatch(invokedSegment);
-            }
+            public bool Matches(string invokedSegment) => _segmentPattern.IsMatch(invokedSegment);
 
             private void BuildSegmentRegex()
             {

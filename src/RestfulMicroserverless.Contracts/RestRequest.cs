@@ -23,7 +23,10 @@ namespace RestfulMicroserverless.Contracts
             get => _method;
             set
             {
-                if (!string.IsNullOrEmpty(Body) && value.Equals(HttpVerb.Get)) throw new ArgumentException("Body is not supported with the GET HttpVerb.");
+                if (!string.IsNullOrEmpty(Body) && value.Equals(HttpVerb.Get))
+                {
+                    throw new ArgumentException("Body is not supported with the GET HttpVerb.");
+                }
                 _method = value;
             }
         }
@@ -34,7 +37,10 @@ namespace RestfulMicroserverless.Contracts
             get => _body;
             set
             {
-                if (Method.Equals(HttpVerb.Get)) throw new ArgumentException("Body is not supported with the GET HttpVerb.");
+                if (Method.Equals(HttpVerb.Get))
+                {
+                    throw new ArgumentException("Body is not supported with the GET HttpVerb.");
+                }
                 _body = value;
             }
         }

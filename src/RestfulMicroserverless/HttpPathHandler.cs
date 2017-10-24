@@ -26,9 +26,6 @@ namespace RestfulMicroseverless
             return await _verbHandlers[request.Method].Invoke(request, logger);
         }
 
-        public bool CanHandle(RestRequest request)
-        {
-            return _route.Matches(request.InvokedPath) && _verbHandlers.ContainsKey(request.Method);
-        }
+        public bool CanHandle(RestRequest request) => _route.Matches(request.InvokedPath) && _verbHandlers.ContainsKey(request.Method);
     }
 }

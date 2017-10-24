@@ -5,9 +5,6 @@ namespace RestfulMicroseverless
 {
     internal class DispatcherFactory : IDispatcherFactory
     {
-        public IDispatcher CreateDispatcher(IEnumerable<IHttpPathHandler> pathHandlers)
-        {
-            return new Dispatcher(pathHandlers);
-        }
+        public IDispatcher CreateDispatcher(IEnumerable<IHttpPathHandler> pathHandlers) => new Dispatcher(pathHandlers);
     }
 }

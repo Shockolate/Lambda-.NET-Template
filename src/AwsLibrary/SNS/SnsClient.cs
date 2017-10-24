@@ -16,11 +16,13 @@ namespace AwsLibrary.SNS
         public SnsClient(string topicArn)
         {
             if (string.IsNullOrEmpty(topicArn))
+            {
                 throw new ArgumentException("SNS Client Constructor must provide a valid TopicARN string.");
+            }
 
             _topicArn = topicArn;
             _awsSnsClient = new AmazonSimpleNotificationServiceClient();
-            _publishRequest = new PublishRequest { TopicArn = _topicArn };
+            _publishRequest = new PublishRequest {TopicArn = _topicArn};
         }
 
         public async Task PublishMessageToTopicAsync(string message, ILogger logger)
@@ -31,7 +33,9 @@ namespace AwsLibrary.SNS
             {
                 var response = await _awsSnsClient.PublishAsync(_publishRequest).ConfigureAwait(false);
                 if (!string.IsNullOrEmpty(response.MessageId))
+                {
                     logger.LogInfo(() => $"Successfully published the message. MessageId: {response.MessageId}");
+                }
             }
             catch (AuthorizationErrorException e)
             {

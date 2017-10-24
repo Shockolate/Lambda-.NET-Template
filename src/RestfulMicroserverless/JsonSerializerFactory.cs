@@ -6,18 +6,15 @@ namespace RestfulMicroseverless
 {
     public static class JsonSerializerFactory
     {
-        public static JsonSerializerSettings CreateDefaultJsonSerializerSettings()
+        public static JsonSerializerSettings CreateDefaultJsonSerializerSettings() => new JsonSerializerSettings
         {
-            return new JsonSerializerSettings
-            {
-                DefaultValueHandling = DefaultValueHandling.Ignore,
-                ContractResolver = new CamelCasePropertyNamesContractResolver(),
-                Formatting = Formatting.Indented,
-                DateFormatHandling = DateFormatHandling.IsoDateFormat,
-                NullValueHandling = NullValueHandling.Include,
-                MissingMemberHandling = MissingMemberHandling.Error
-            };
-        }
+            DefaultValueHandling = DefaultValueHandling.Ignore,
+            ContractResolver = new CamelCasePropertyNamesContractResolver(),
+            Formatting = Formatting.Indented,
+            DateFormatHandling = DateFormatHandling.IsoDateFormat,
+            NullValueHandling = NullValueHandling.Include,
+            MissingMemberHandling = MissingMemberHandling.Error
+        };
 
         public static IPayloadSerializer CreateJsonPayloadSerializer()
         {

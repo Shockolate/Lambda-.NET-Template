@@ -4,8 +4,13 @@ namespace RestfulMicroserverless.Contracts
 {
     public class RestResponse
     {
+        public RestResponse()
+        {
+            Headers = new Dictionary<string, string> {{"Content-Type", "application/json"}};
+        }
+
         /// <summary>
-        /// object to be serialized in the HTTP Body.
+        ///     object to be serialized in the HTTP Body.
         /// </summary>
         public object Body { get; set; }
 
@@ -14,10 +19,5 @@ namespace RestfulMicroserverless.Contracts
 
         // HTTP Status Code. RFC 2616
         public int StatusCode { get; set; }
-
-        public RestResponse()
-        {
-            Headers = new Dictionary<string, string> {{"Content-Type", "application/json"}};
-        }
     }
 }
