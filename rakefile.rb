@@ -1,5 +1,3 @@
-::USING_WINDOWS = !!((RUBY_PLATFORM =~ /(win|w)(32|64)$/) || (RUBY_PLATFORM=~ /mswin|mingw/))
-
 require 'aws-sdk'
 Aws.use_bundled_cert!
 require 'rake'
@@ -15,7 +13,6 @@ require 'active_support/core_ext/hash'
 require 'mail'
 require 'nokogiri'
 require 'pathname'
-
 
 STDOUT.sync = true
 STDERR.sync = true
@@ -73,6 +70,11 @@ task :teardown_environment, [:environment] => [:parse_config] do |t, args|
   env = args[:environment]
   raise 'Parameter environment needs to be set' if env.nil?
   API.teardown(LambdaWrap::Environment.new(name: args[:environment]))
+end
+
+desc 'Deletes the service from AWS. NO TURNING BACK.'
+task :delete => [:parse_config] do |t, args|
+  delete
 end
 
 # Workflow tasks
@@ -292,7 +294,11 @@ end
 
 def teardown(environment_symbol)
   raise ArgumentError 'Must pass an environment symbol!' unless environment_symbol.is_a?(Symbol)
-  API.deploy(ENVIRONMENTS[environment_symbol])
+  API.teardown(ENVIRONMENTS[environment_symbol])
+end
+
+def delete()
+  API.delete
 end
 
 def release_notification(application_name, build_number)
