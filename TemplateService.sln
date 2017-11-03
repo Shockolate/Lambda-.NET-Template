@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.16
+VisualStudioVersion = 15.0.27004.2006
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AwsLibrary", "src\AwsLibrary\AwsLibrary.csproj", "{63D10EE9-A54F-46D5-AAB9-542E1D434ED8}"
 EndProject
@@ -15,7 +15,16 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TemplateService", "src\Temp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TemplateService.APIGatewayAdapter", "src\TemplateService.APIGatewayAdapter\TemplateService.APIGatewayAdapter.csproj", "{B3084169-AD9D-4417-9B07-C64095A9CEE0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TemplateService.APIGatewayAdapter.UnitTests", "src\TemplateService.APIGatewayAdapter.UnitTests\TemplateService.APIGatewayAdapter.UnitTests.csproj", "{485F5F40-A0BB-466C-AAFF-883761CE29BC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TemplateService.APIGatewayAdapter.UnitTests", "src\TemplateService.APIGatewayAdapter.UnitTests\TemplateService.APIGatewayAdapter.UnitTests.csproj", "{485F5F40-A0BB-466C-AAFF-883761CE29BC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9A72B739-41FD-4407-B61E-A0665DE45809}"
+	ProjectSection(SolutionItems) = preProject
+		config\APIGatewaySwagger.yaml = config\APIGatewaySwagger.yaml
+		config\ClientSwagger.yaml = config\ClientSwagger.yaml
+		config\config.yaml = config\config.yaml
+		Gemfile = Gemfile
+		rakefile.rb = rakefile.rb
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

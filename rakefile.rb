@@ -32,7 +32,7 @@ CLEAN.include(REPORTS_DIR)
 desc 'Compiles the source code to binaries.'
 task :build => [:clean, :parse_config, :retrieve, :dotnet_build, :lint]
 desc 'Builds and runs unit tests.'
-task :test => [:build, :unit_test]
+task :test => [:build, :unit_test, :integration_test]
 
 # Commit Targets
 task :merge_job  => [:build, :test, :package, :deploy_production, :release_notification]
@@ -93,12 +93,21 @@ task :retrieve do
   raise "Dependency installation failed." unless system(cmd)
 end
 
-desc 'Runs Unit tests located in the src/UnitTests project.'
+desc 'Runs Unit Tests located in the src/*.UnitTests projects.'
 task :unit_test do
   Dir["#{SRC_DIR}/**/*.UnitTests/*.csproj"].each do |csproj_path|
-    cmd = "dotnet test #{csproj_path} --no-build --logger:trx;LogFileName=#{File.join(REPORTS_DIR, 'testresults.trx')}"
+    cmd = "dotnet test #{csproj_path} --no-build --logger:trx;LogFileName=#{File.join(REPORTS_DIR, 'UnitTestResults.trx')}"
     puts "Running Command: #{cmd}"
     raise "Error running unit tests: #{csproj_path}" unless system(cmd)
+  end
+end
+
+desc 'Runs Integration Tests located in the src/*.IntegrationTests projects.'
+task :integration_test do
+  Dir["#{SRC_DIR}/**/*.IntegrationTests/*.csproj"].each do |csproj_path|
+    cmd = "dotnet test #{csproj_path} --no-build --logger:trx;LogFileName=#{File.join(REPORTS_DIR, 'IntegrationTestResults.trx')}"
+    puts "Running Command: #{cmd}"
+    raise "Error running integration tests: #{csproj_path}" unless system(cmd)
   end
 end
 
@@ -339,7 +348,7 @@ def release_notification(application_name, build_number)
   t1 = Time.now
   notification = Mail.new do
     from    'MSWProductionShopfloor@vistaprint.com'
-    to      'MSWProductionShopfloor@vistaprint.com'
+    to      'MSWProductionShopfloorReleaseNotifications@vistaprint.com'
     subject "New Release to #{application_name} - A Shopfloor Service"
     body    notification_body
   end
