@@ -38,43 +38,51 @@ task :test => [:build, :unit_test]
 task :merge_job  => [:build, :test, :package, :deploy_production, :release_notification]
 task :pull_request_job => [:build, :test, :package, :deploy_test]
 
-task :deploy_production => [:parse_config, :build, :package] do
+task :deploy_production => [:parse_config, :build, :pre_deploy, :package] do
   deploy(:production)
   # TODO
   # upload_swagger_file
 end
 
-task :deploy_test => [:parse_config, :build, :package] do
+task :deploy_test => [:parse_config, :build, :pre_deploy, :package] do
   deploy(:test)
 end
 
-task :deploy_environment, [:environment, :verbosity] => [:build] do |t, args|
+task :deploy_environment, [:environment, :verbosity] => [:parse_config, :build, :pre_deploy] do |t, args|
   raise 'Parameter environment needs to be set' if args[:environment].nil?
   raise 'Parameter verbosity needs to be set' if args[:verbosity].nil?
   API.deploy(LambdaWrap::Environment.new(args[:environment], { 'verbosity' => args[:verbosity] }))
 end
 
 desc 'Don\'t.'
-task :teardown_production => [:parse_config] do
+task :teardown_production => [:parse_config, :pre_deploy] do
   teardown(:production)
 end
 
 desc 'If you want.'
-task :teardown_test => [:parse_config] do
+task :teardown_test => [:parse_config, :pre_deploy] do
   teardown(:test)
 end
 
 desc 'tears down an environment - Removes Lambda Aliases and Deletes API Gateway Stage.'
-task :teardown_environment, [:environment] => [:parse_config] do |t, args|
+task :teardown_environment, [:environment] => [:parse_config, :pre_deploy] do |t, args|
   # validate input parameters
   env = args[:environment]
   raise 'Parameter environment needs to be set' if env.nil?
   API.teardown(LambdaWrap::Environment.new(name: args[:environment]))
 end
 
-desc 'Deletes the service from AWS. NO TURNING BACK.'
-task :delete => [:parse_config] do |t, args|
-  delete
+desc 'Deletes Lambda Function & API Gateway. NO TURNING BACK.'
+task :delete => [:parse_config, :pre_deploy] do
+  puts "Are you sure you want to delete the API Gateway and Lambdas for: #{CONFIGURATION[:application_name]}"
+  puts 'Enter the application name to continue with deletion.'
+  input = STDIN.gets.strip
+  if input == CONFIGURATION[:application_name]
+    puts 'deleting...'
+    delete
+  else
+    puts 'Exiting.'
+  end
 end
 
 # Workflow tasks
@@ -137,6 +145,17 @@ end
 task :parse_config do
   puts 'Parsing config...'
   CONFIGURATION = YAML::load_file(File.join(CONFIG_DIR, 'config.yaml')).deep_symbolize_keys
+  Mail.defaults do
+    delivery_method :smtp, address: 'relay.vistaprint.net', port: 25
+  end
+
+  FileUtils.mkdir(PACKAGE_DIR, verbose: true) unless Dir.exists?(PACKAGE_DIR)
+  FileUtils.mkdir(REPORTS_DIR, verbose: true) unless Dir.exists?(REPORTS_DIR)
+
+  puts 'parsed. '
+end
+
+task :pre_deploy do
   API = LambdaWrap::API.new()
 
   ENVIRONMENTS = {}
@@ -155,15 +174,6 @@ task :parse_config do
   API.add_api_gateway(
     LambdaWrap::ApiGateway.new(path_to_swagger_file: File.join(CONFIG_DIR, 'APIGatewaySwagger.yaml'))
   )
-
-  Mail.defaults do
-    delivery_method :smtp, address: 'relay.vistaprint.net', port: 25
-  end
-
-  FileUtils.mkdir(PACKAGE_DIR, verbose: true) unless Dir.exists?(PACKAGE_DIR)
-  FileUtils.mkdir(REPORTS_DIR, verbose: true) unless Dir.exists?(REPORTS_DIR)
-
-  puts 'parsed. '
 end
 
 task :release_notification => [:parse_config] do

@@ -7,5 +7,5 @@ source 'https://rubygems.org' do
   gem 'activesupport', '~> 4.2', '>= 4.2.8'
   gem 'swagger-core'
   gem 'mail'
-  gem 'nokogiri'
+  gem 'nokogiri', '~> 1.7.2'
 end
