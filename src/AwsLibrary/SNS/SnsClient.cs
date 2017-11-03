@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Amazon;
 using Amazon.Runtime;
 using Amazon.SimpleNotificationService;
 using Amazon.SimpleNotificationService.Model;
@@ -9,20 +11,23 @@ namespace AwsLibrary.SNS
 {
     public class SnsClient : ISnsClient
     {
+        private static readonly Regex _snsTopicRegex = new Regex("^arn:aws:sns:([a-z]{2}-[a-z]+-[0-9]+):[0-9]{12}:([A-Za-z0-9\\-_]{1,256}$)");
         private readonly AmazonSimpleNotificationServiceClient _awsSnsClient;
         private readonly PublishRequest _publishRequest;
         private readonly string _topicArn;
 
         public SnsClient(string topicArn)
         {
-            if (string.IsNullOrEmpty(topicArn))
+            var match = _snsTopicRegex.Match(topicArn);
+            if (!match.Success)
             {
                 throw new ArgumentException("SNS Client Constructor must provide a valid TopicARN string.");
             }
 
+
             _topicArn = topicArn;
-            _awsSnsClient = new AmazonSimpleNotificationServiceClient();
-            _publishRequest = new PublishRequest {TopicArn = _topicArn};
+            _awsSnsClient = new AmazonSimpleNotificationServiceClient(RegionEndpoint.GetBySystemName(match.Groups[1].Value));
+            _publishRequest = new PublishRequest { TopicArn = _topicArn };
         }
 
         public async Task PublishMessageToTopicAsync(string message, ILogger logger)

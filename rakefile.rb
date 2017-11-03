@@ -32,49 +32,57 @@ CLEAN.include(REPORTS_DIR)
 desc 'Compiles the source code to binaries.'
 task :build => [:clean, :parse_config, :retrieve, :dotnet_build, :lint]
 desc 'Builds and runs unit tests.'
-task :test => [:build, :unit_test]
+task :test => [:build, :unit_test, :integration_test]
 
 # Commit Targets
 task :merge_job  => [:build, :test, :package, :deploy_production, :release_notification]
 task :pull_request_job => [:build, :test, :package, :deploy_test]
 
-task :deploy_production => [:parse_config, :build, :package] do
+task :deploy_production => [:parse_config, :build, :pre_deploy, :package] do
   deploy(:production)
   # TODO
   # upload_swagger_file
 end
 
-task :deploy_test => [:parse_config, :build, :package] do
+task :deploy_test => [:parse_config, :build, :pre_deploy, :package] do
   deploy(:test)
 end
 
-task :deploy_environment, [:environment, :verbosity] => [:build] do |t, args|
+task :deploy_environment, [:environment, :verbosity] => [:parse_config, :build, :pre_deploy] do |t, args|
   raise 'Parameter environment needs to be set' if args[:environment].nil?
   raise 'Parameter verbosity needs to be set' if args[:verbosity].nil?
   API.deploy(LambdaWrap::Environment.new(args[:environment], { 'verbosity' => args[:verbosity] }))
 end
 
 desc 'Don\'t.'
-task :teardown_production => [:parse_config] do
+task :teardown_production => [:parse_config, :pre_deploy] do
   teardown(:production)
 end
 
 desc 'If you want.'
-task :teardown_test => [:parse_config] do
+task :teardown_test => [:parse_config, :pre_deploy] do
   teardown(:test)
 end
 
 desc 'tears down an environment - Removes Lambda Aliases and Deletes API Gateway Stage.'
-task :teardown_environment, [:environment] => [:parse_config] do |t, args|
+task :teardown_environment, [:environment] => [:parse_config, :pre_deploy] do |t, args|
   # validate input parameters
   env = args[:environment]
   raise 'Parameter environment needs to be set' if env.nil?
   API.teardown(LambdaWrap::Environment.new(name: args[:environment]))
 end
 
-desc 'Deletes the service from AWS. NO TURNING BACK.'
-task :delete => [:parse_config] do |t, args|
-  delete
+desc 'Deletes Lambda Function & API Gateway. NO TURNING BACK.'
+task :delete => [:parse_config, :pre_deploy] do
+  puts "Are you sure you want to delete the API Gateway and Lambdas for: #{CONFIGURATION[:application_name]}"
+  puts 'Enter the application name to continue with deletion.'
+  input = STDIN.gets.strip
+  if input == CONFIGURATION[:application_name]
+    puts 'deleting...'
+    delete
+  else
+    puts 'Exiting.'
+  end
 end
 
 # Workflow tasks
@@ -85,12 +93,21 @@ task :retrieve do
   raise "Dependency installation failed." unless system(cmd)
 end
 
-desc 'Runs Unit tests located in the src/UnitTests project.'
+desc 'Runs Unit Tests located in the src/*.UnitTests projects.'
 task :unit_test do
   Dir["#{SRC_DIR}/**/*.UnitTests/*.csproj"].each do |csproj_path|
-    cmd = "dotnet test #{csproj_path} --no-build --logger:trx;LogFileName=#{File.join(REPORTS_DIR, 'testresults.trx')}"
+    cmd = "dotnet test #{csproj_path} --no-build --logger:trx;LogFileName=#{File.join(REPORTS_DIR, 'UnitTestResults.trx')}"
     puts "Running Command: #{cmd}"
     raise "Error running unit tests: #{csproj_path}" unless system(cmd)
+  end
+end
+
+desc 'Runs Integration Tests located in the src/*.IntegrationTests projects.'
+task :integration_test do
+  Dir["#{SRC_DIR}/**/*.IntegrationTests/*.csproj"].each do |csproj_path|
+    cmd = "dotnet test #{csproj_path} --no-build --logger:trx;LogFileName=#{File.join(REPORTS_DIR, 'IntegrationTestResults.trx')}"
+    puts "Running Command: #{cmd}"
+    raise "Error running integration tests: #{csproj_path}" unless system(cmd)
   end
 end
 
@@ -137,6 +154,17 @@ end
 task :parse_config do
   puts 'Parsing config...'
   CONFIGURATION = YAML::load_file(File.join(CONFIG_DIR, 'config.yaml')).deep_symbolize_keys
+  Mail.defaults do
+    delivery_method :smtp, address: 'relay.vistaprint.net', port: 25
+  end
+
+  FileUtils.mkdir(PACKAGE_DIR, verbose: true) unless Dir.exists?(PACKAGE_DIR)
+  FileUtils.mkdir(REPORTS_DIR, verbose: true) unless Dir.exists?(REPORTS_DIR)
+
+  puts 'parsed. '
+end
+
+task :pre_deploy do
   API = LambdaWrap::API.new()
 
   ENVIRONMENTS = {}
@@ -155,15 +183,6 @@ task :parse_config do
   API.add_api_gateway(
     LambdaWrap::ApiGateway.new(path_to_swagger_file: File.join(CONFIG_DIR, 'APIGatewaySwagger.yaml'))
   )
-
-  Mail.defaults do
-    delivery_method :smtp, address: 'relay.vistaprint.net', port: 25
-  end
-
-  FileUtils.mkdir(PACKAGE_DIR, verbose: true) unless Dir.exists?(PACKAGE_DIR)
-  FileUtils.mkdir(REPORTS_DIR, verbose: true) unless Dir.exists?(REPORTS_DIR)
-
-  puts 'parsed. '
 end
 
 task :release_notification => [:parse_config] do
@@ -329,7 +348,7 @@ def release_notification(application_name, build_number)
   t1 = Time.now
   notification = Mail.new do
     from    'MSWProductionShopfloor@vistaprint.com'
-    to      'MSWProductionShopfloor@vistaprint.com'
+    to      'MSWProductionShopfloorReleaseNotifications@vistaprint.com'
     subject "New Release to #{application_name} - A Shopfloor Service"
     body    notification_body
   end
