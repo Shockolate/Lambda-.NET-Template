@@ -14,7 +14,7 @@ namespace RestfulMicroserverless.UnitTests
         private IEnumerable<IHttpPathHandler> _noMatchingHandlerPathHandlers;
         private IEnumerable<IHttpPathHandler> _throwingPathHandlers;
         private readonly IHttpPathHandlerFactory _pathHandlerFactory = new HttpPathHandlerFactory();
-        private readonly RestResponseFactory _restResponseFactory = new RestResponseFactory(JsonSerializerFactory.CreateJsonPayloadSerializer());
+        private readonly RestResponseFactory _restResponseFactory = new RestResponseFactory();
         private readonly ILogger _logger = new UnitTestLogger();
 
         private Task<RestResponse> _postFulfilledItemAsync(RestRequest request, ILogger logger)

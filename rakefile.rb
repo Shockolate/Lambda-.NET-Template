@@ -114,13 +114,8 @@ end
 task :dotnet_build do
   puts "Dotnet Build...."
   t1 = Time.now
-  Dir["#{SRC_DIR}/**/*.csproj"].each do |csproj_path|
-    cmd = "dotnet build #{csproj_path} --no-restore --framework=netcoreapp1.1"
-    puts "Running Command: #{cmd}"
-    raise "Error Building Project: #{csproj_path}" unless system(cmd)
-  end
 
-  cmd = "dotnet build --no-restore --framework=netcoreapp1.1"
+  cmd = "dotnet build --no-restore --framework=netcoreapp1.1 /maxcpucount:1 /verbosity:normal"
   puts "Running Command: #{cmd}"
   raise "Error building Solution." unless system(cmd)
 
