@@ -11,7 +11,7 @@ namespace TemplateService
             IConfiguration configuration)
         {
             // Use Configuration.
-            var restResponseFactory = new RestResponseFactory(payloadSerializer);
+            var restResponseFactory = new RestResponseFactory();
             var templatePathHandler = new TemplatePathHandler(restResponseFactory);
             return new List<IHttpPathHandler> {pathHandlerFactory.CreateHttpPathHandler("template/path", templatePathHandler.VerbHandlers)};
         }

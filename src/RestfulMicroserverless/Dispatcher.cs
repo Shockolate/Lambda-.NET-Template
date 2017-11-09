@@ -13,7 +13,7 @@ namespace RestfulMicroseverless
 
         public Dispatcher(IEnumerable<IHttpPathHandler> handlers)
         {
-            _restResponseFactory = new RestResponseFactory(JsonSerializerFactory.CreateJsonPayloadSerializer());
+            _restResponseFactory = new RestResponseFactory();
             Handlers = handlers;
         }
 
