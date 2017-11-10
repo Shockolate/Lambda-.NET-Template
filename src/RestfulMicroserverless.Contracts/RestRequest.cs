@@ -15,7 +15,7 @@ namespace RestfulMicroserverless.Contracts
         #region Properties
 
         // Http Response headers RFC 2616
-        public IDictionary<string, string> Headers { get; set; }
+        public IDictionary<string, string> Headers { get; set; } = new Dictionary<string, string>();
 
         // HTTP Methods Supported by REST. See: http://www.restapitutorial.com/lessons/httpmethods.html
         public HttpVerb Method
@@ -47,9 +47,9 @@ namespace RestfulMicroserverless.Contracts
 
         public string InvokedPath { get; set; }
 
-        public IDictionary<string, string> PathParameters { get; set; }
+        public IDictionary<string, string> PathParameters { get; set; } = new Dictionary<string, string>();
 
-        public IDictionary<string, string> QueryStringParameters { get; set; }
+        public IDictionary<string, string> QueryStringParameters { get; set; } = new Dictionary<string, string>();
 
         #endregion
     }
