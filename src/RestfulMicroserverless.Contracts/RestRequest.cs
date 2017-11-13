@@ -14,10 +14,14 @@ namespace RestfulMicroserverless.Contracts
 
         #region Properties
 
-        // Http Response headers RFC 2616
+        /// <summary>
+        /// Http Headers RFC 2616
+        /// </summary>
         public IDictionary<string, string> Headers { get; set; } = new Dictionary<string, string>();
 
-        // HTTP Methods Supported by REST. See: http://www.restapitutorial.com/lessons/httpmethods.html
+        /// <summary>
+        /// HTTP Methods Supported by REST. See: http://www.restapitutorial.com/lessons/httpmethods.html
+        /// </summary>
         public HttpVerb Method
         {
             get => _method;
@@ -31,7 +35,9 @@ namespace RestfulMicroserverless.Contracts
             }
         }
 
-        // JSON SLOB Body
+        /// <summary>
+        /// JSON SLOB Body.
+        /// </summary>
         public string Body
         {
             get => _body;
