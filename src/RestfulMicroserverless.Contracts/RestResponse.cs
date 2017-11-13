@@ -7,7 +7,8 @@ namespace RestfulMicroserverless.Contracts
     {
         #region Fields
 
-        private int _statusCode;
+        // default - OK
+        private int _statusCode = 200;
 
         #endregion
 
@@ -23,10 +24,14 @@ namespace RestfulMicroserverless.Contracts
         /// </summary>
         public object Body { get; set; }
 
-        // Http Response headers RFC 2616
+        /// <summary>
+        ///  Http Response headers RFC 2616
+        /// </summary>
         public IDictionary<string, string> Headers { get; set; }
 
-        // HTTP Status Code. RFC 2616
+        /// <summary>
+        ///  HTTP Status Code. RFC 2616
+        /// </summary>
         public int StatusCode
         {
             get => _statusCode;
